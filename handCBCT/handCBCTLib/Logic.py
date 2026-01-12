@@ -118,9 +118,9 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       from SlicerNNUNetLib import Parameter, SegmentationLogic
       self.modelParameters = Parameter(modelPath = self.getModelPath())
       if self.hasValidParams:
-        slicer.util.MessageBox("Model directory is valid.")
+        slicer.util.messageBox("Model directory is valid.")
       else:
-        slicer.util.MessageBox("Model directory is not valid.")
+        slicer.util.messageBox("Model directory is not valid.")
 
 
       self.segmentationLogic = SegmentationLogic()
