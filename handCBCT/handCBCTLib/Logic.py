@@ -1,6 +1,7 @@
 import logging
 
 import slicer
+import slicer.util
 from slicer.ScriptedLoadableModule import ScriptedLoadableModuleLogic
 
 #
@@ -22,6 +23,9 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
         Called when the logic class is instantiated. Can be used for initializing member variables.
         """
         ScriptedLoadableModuleLogic.__init__(self)
+        self.segmentationLogic = None
+        self.dependenciesInstalled = False
+        self.is_setup = False
 
     def setDefaultParameters(self, parameterNode):
         """
@@ -42,6 +46,8 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
         :param invert: if True then values above the threshold will be set to 0, otherwise values below are set to 0
         :param showResult: show output volume in slice viewers
         """
+        if not self.is_setup:
+          self.setup()
 
         if not inputVolume or not outputVolume:
             raise ValueError("Input or output volume is invalid")
@@ -63,3 +69,81 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
 
         stopTime = time.time()
         logging.info(f'Processing completed in {stopTime-startTime:.2f} seconds')
+
+
+        
+
+    def installDependencies(self):
+      """
+      Install dependencies utilizing the SlicerNNuNet extension
+      """
+      try:
+          import SlicerNNUNetLib
+      except ModuleNotFoundError as err:
+          slicer.util.errorDisplay("This module requires the SlicerNNUNet extension. Please install it in Extension Manager.")
+          raise err
+
+      from SlicerNNUNetLib import InstallLogic
+      install_logic = InstallLogic()
+      install_logic.progressInfo.connect(print) # TODO: review later whether we wish to log somewhere else
+      install_logic.setupPythonRequirements()
+
+      self.dependenciesInstalled = True
+
+    def setup(self):
+      """
+      Setup logic including installing dependencies, loading model weight, and defining self.segmentationLogic
+      """
+      if not self.dependenciesInstalled:
+        self.installDependencies()
+
+      # SlicerNNUNetLib is installed
+      from SlicerNNUNetLib import SegmentationLogic
+
+      self.segmentationLogic = SegmentationLogic()
+
+      self.loadWeights()
+      self.is_setup = True
+
+    def loadWeights(self):
+      """
+      Load weights for nnUNet from folder
+      Folder specifications: https://github.com/KitwareMedical/SlicerNNUnet?tab=readme-ov-file#expected-weight-folder-structure
+
+      See the SlicerNNUNet Parameter class for more details
+      """
+      if not self.dependenciesInstalled:
+        self.installDependencies()
+
+      from SlicerNNUNetLib import Parameter, SegmentationLogic
+      self.modelParameters = Parameter(modelPath = self.getModelPath())
+      if self.hasValidParams:
+        slicer.util.MessageBox("Model directory is valid.")
+      else:
+        slicer.util.MessageBox("Model directory is not valid.")
+
+
+      self.segmentationLogic = SegmentationLogic()
+      self.segmentationLogic.setParameter(self.modelParameters)
+
+
+    def getModelPath(self):
+      """
+      Get path to model directory, download to here
+      """
+      from pathlib import Path
+      path = Path(__file__).parent
+      return path.joinpath("..", "Resources", "Model").resolve()
+    
+    @property
+    def hasValidParams(self):
+      if self.modelParameters:
+        return self.modelParameters.isValid()
+      else:
+        return False
+      
+    
+
+      
+
+
