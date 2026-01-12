@@ -284,22 +284,8 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
                 self.logic.process(self.ui.inputSelector.currentNode(), self.ui.invertedOutputSelector.currentNode(),
                                    self.ui.imageThresholdSliderWidget.value, not self.ui.invertOutputCheckBox.checked, showResult=False)
 
-    def installDependencies():
-        """
-        Install dependencies utilizing the SlicerNNuNet extension
-        """
-        try:
-            import SlicerNNUNetLib
-        except ModuleNotFoundError as err:
-            slicer.util.errorDisplay("This module requires the SlicerNNUNet extension. Please install it in Extension Manager.")
-            raise err
+            self.ui.textEdit.setPlainText("Valid" if self.logic.valid_params else "Invalid")
 
-        from SlicerNNUNetLib import InstallLogic
-        install_logic = InstallLogic()
-        install_logic.progressInfo.connect(print) # TODO: review later if we wish to log somewhere else
-        install_logic.setupPythonRequirements()
-
-    
 
 #
 # handCBCTLogic moved to handCBCTLib.Logic
