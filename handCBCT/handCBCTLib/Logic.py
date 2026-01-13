@@ -59,6 +59,8 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
         # TODO: enable modification of parameters, specifically the fold count
         self.segmentationLogic.startSegmentation(inputVolume)
         
+        
+        stopTime = time.time()
         logging.info(f'Processing completed in {stopTime-startTime:.2f} seconds')
 
 
