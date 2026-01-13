@@ -94,7 +94,7 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       self.segmentationLogic = SegmentationLogic()
       self.segmentationLogic.progressInfo.connect(print)
       self.segmentationLogic.errorOccurred.connect(slicer.util.errorDisplay)
-      self.segmentationLogic.inferencedFinished.connect(self.segmentationLogic.loadSegmentation)
+      self.segmentationLogic.inferenceFinished.connect(self.segmentationLogic.loadSegmentation)
       
       self.loadWeights()
       self.is_setup = True
@@ -131,7 +131,9 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
     @property
     def hasValidParams(self):
       if self.modelParameters:
-        return self.modelParameters.isValid()
+        modelResponse = self.modelParameters.isValid()
+        print(modelResponse[1])
+        return modelResponse[0]
       else:
         return False
       
