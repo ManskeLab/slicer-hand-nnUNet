@@ -24,6 +24,9 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
         """
         ScriptedLoadableModuleLogic.__init__(self)
         self.segmentationLogic = None
+        self.modelParameters = None
+
+        # flags for setup related tasks
         self.dependenciesInstalled = False
         self.is_setup = False
 
@@ -38,6 +41,7 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
         if not parameterNode.GetParameter("Invert"):
             parameterNode.SetParameter("Invert", "false")
         """
+
     def process(self, inputVolume, outputVolume):
         """
         Run the processing algorithm.
@@ -56,7 +60,7 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
         startTime = time.time()
         logging.info('Processing started')
         
-        # TODO: enable modification of parameters, specifically the fold count
+        # TODO: enable modification of parameters, specifically the fold count. Integrate with parameter nodes, or provide an update function if run from GUI.
         self.segmentationLogic.startSegmentation(inputVolume)
         
         
@@ -94,11 +98,14 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       from SlicerNNUNetLib import SegmentationLogic
 
       self.segmentationLogic = SegmentationLogic()
+
+      # connect Segmentation signals
       self.segmentationLogic.progressInfo.connect(print)
       self.segmentationLogic.errorOccurred.connect(slicer.util.errorDisplay)
       self.segmentationLogic.inferenceFinished.connect(self.segmentationLogic.loadSegmentation)
       
-      self.loadWeights()
+      # finish set up 
+      self.loadWeights() # TODO: add download method for weights if not present
       self.is_setup = True
 
     def loadWeights(self):
@@ -106,7 +113,7 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       Load weights for nnUNet from folder
       Folder specifications: https://github.com/KitwareMedical/SlicerNNUnet?tab=readme-ov-file#expected-weight-folder-structure
 
-      See the SlicerNNUNet Parameter class for more details
+      See the SlicerNNUNetLib Parameter class for more details
       """
       if not self.dependenciesInstalled:
         self.installDependencies()
@@ -121,17 +128,25 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
 
       self.segmentationLogic.setParameter(self.modelParameters)
 
-
-    def getModelPath(self):
+    @property
+    def modelPath(self):
       """
-      Get path to model directory, download to here
+      Path to model directory.
+        
+      Module should download weights folder to here.
+      Provide this directory to SlicerNNUNetLib for module loading.
       """
       from pathlib import Path
       path = Path(__file__).parent
       return path.joinpath("..", "Resources", "Model").resolve()
     
+  
+
     @property
     def hasValidParams(self):
+      """
+      Validity of current model parameters as loaded from self.modelPath
+      """
       if self.modelParameters:
         modelResponse = self.modelParameters.isValid()
         print(modelResponse[1])
