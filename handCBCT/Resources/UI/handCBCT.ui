@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>286</width>
-    <height>402</height>
+    <width>521</width>
+    <height>488</height>
    </rect>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -29,6 +29,9 @@
       </item>
       <item row="0" column="1">
        <widget class="qMRMLNodeComboBox" name="inputSelector">
+        <property name="cursor">
+         <cursorShape>PointingHandCursor</cursorShape>
+        </property>
         <property name="toolTip">
          <string>Pick the input to the algorithm.</string>
         </property>
@@ -46,6 +49,127 @@
         <property name="removeEnabled">
          <bool>false</bool>
         </property>
+        <property name="renameEnabled">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Folds:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_5">
+        <property name="text">
+         <string>Device:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="ctkComboBox" name="foldSelector">
+        <property name="cursor">
+         <cursorShape>PointingHandCursor</cursorShape>
+        </property>
+        <property name="toolTip">
+         <string>Select number of folds used for nnUNet model</string>
+        </property>
+        <property name="statusTip">
+         <string>statusTip</string>
+        </property>
+        <property name="whatsThis">
+         <string>whatsThis</string>
+        </property>
+        <property name="currentText">
+         <string/>
+        </property>
+        <property name="placeholderText">
+         <string>Select number of folds</string>
+        </property>
+        <property name="defaultText">
+         <string>Select number of folds for model</string>
+        </property>
+        <property name="defaultIcon">
+         <iconset theme="1"/>
+        </property>
+        <property name="forceDefault" stdset="0">
+         <bool>false</bool>
+        </property>
+        <item>
+         <property name="text">
+          <string>1</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>2</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>3</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>4</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>5</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="ctkComboBox" name="deviceSelector">
+        <property name="font">
+         <font>
+          <family>.AppleSystemUIFont</family>
+         </font>
+        </property>
+        <property name="cursor">
+         <cursorShape>PointingHandCursor</cursorShape>
+        </property>
+        <property name="contextMenuPolicy">
+         <enum>Qt::DefaultContextMenu</enum>
+        </property>
+        <property name="toolTip">
+         <string>Select desired device type</string>
+        </property>
+        <property name="toolTipDuration">
+         <number>6</number>
+        </property>
+        <property name="placeholderText">
+         <string>Select device type</string>
+        </property>
+        <property name="defaultText">
+         <string>Select device type</string>
+        </property>
+        <property name="forceDefault" stdset="0">
+         <bool>false</bool>
+        </property>
+        <property name="currentUserDataAsString">
+         <string/>
+        </property>
+        <item>
+         <property name="text">
+          <string>cuda</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>cpu</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>mps</string>
+         </property>
+        </item>
        </widget>
       </item>
      </layout>
@@ -66,6 +190,9 @@
       </item>
       <item row="0" column="1">
        <widget class="qMRMLNodeComboBox" name="outputSelector">
+        <property name="cursor">
+         <cursorShape>PointingHandCursor</cursorShape>
+        </property>
         <property name="toolTip">
          <string>Pick the output to the algorithm.</string>
         </property>
@@ -86,6 +213,9 @@
         <property name="removeEnabled">
          <bool>true</bool>
         </property>
+        <property name="renameEnabled">
+         <bool>false</bool>
+        </property>
        </widget>
       </item>
      </layout>
@@ -95,6 +225,12 @@
     <widget class="QPushButton" name="applyButton">
      <property name="enabled">
       <bool>false</bool>
+     </property>
+     <property name="font">
+      <font>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
      </property>
      <property name="toolTip">
       <string>Run the algorithm.</string>
@@ -131,6 +267,19 @@
      </item>
     </layout>
    </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
   </layout>
  </widget>
  <customwidgets>
@@ -139,6 +288,11 @@
    <extends>QWidget</extends>
    <header>ctkCollapsibleButton.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ctkComboBox</class>
+   <extends>QComboBox</extends>
+   <header>ctkComboBox.h</header>
   </customwidget>
   <customwidget>
    <class>qMRMLNodeComboBox</class>
