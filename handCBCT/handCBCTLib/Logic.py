@@ -4,6 +4,8 @@ import slicer
 import slicer.util
 from slicer.ScriptedLoadableModule import ScriptedLoadableModuleLogic
 
+from .Parameter import handCBCTParameterNode
+
 #
 # handCBCTLogic
 #
@@ -29,20 +31,14 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
         # flags for setup related tasks
         self.dependenciesInstalled = False
         self.is_setup = False
-
-    def setDefaultParameters(self, parameterNode):
-        """
-        Initialize parameter node with default settings.
-        """
-        
-        """ Code provided by Extension Wizard
-        if not parameterNode.GetParameter("Threshold"):
-            parameterNode.SetParameter("Threshold", "100.0")
-        if not parameterNode.GetParameter("Invert"):
-            parameterNode.SetParameter("Invert", "false")
-        """
-
-    def process(self, inputVolume, outputVolume):
+    
+    def getParameterNode(self):
+       """
+        Return a Parameter Node 
+       """
+       return handCBCTParameterNode(super().getParameterNode())
+    
+    def process(self, inputVolume, outputSegment):
         """
         Run the processing algorithm.
         Can be used without GUI widget.
@@ -53,8 +49,8 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
         if not self.is_setup:
           self.setup()
 
-        if not inputVolume or not outputVolume:
-            raise ValueError("Input or output volume is invalid")
+        if not inputVolume or not outputSegment:
+            raise ValueError("Input or output selected is invalid")
 
         import time
         startTime = time.time()
@@ -66,8 +62,6 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
         
         stopTime = time.time()
         logging.info(f'Processing completed in {stopTime-startTime:.2f} seconds')
-
-
         
 
     def installDependencies(self):
@@ -140,8 +134,6 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       path = Path(__file__).parent
       return path.joinpath("..", "Resources", "Model").resolve()
     
-  
-
     @property
     def hasValidParams(self):
       """
