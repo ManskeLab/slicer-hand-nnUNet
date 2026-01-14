@@ -105,7 +105,7 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         VTKObservationMixin.__init__(self)  # needed for parameter node observation
         self.logic = None
         self._parameterNode = None
-        self._updatingGUIFromParameterNode = False
+        self._parameterNodeGuiTag = False
 
     def setup(self):
         """
@@ -134,12 +134,6 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.addObserver(slicer.mrmlScene, slicer.mrmlScene.StartCloseEvent, self.onSceneStartClose)
         self.addObserver(slicer.mrmlScene, slicer.mrmlScene.EndCloseEvent, self.onSceneEndClose)
 
-        # These connections ensure that whenever user changes some settings on the GUI, that is saved in the MRML scene
-        # (in the selected parameter node).
-        self.ui.inputSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.updateParameterNodeFromGUI)
-        self.ui.outputSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.updateParameterNodeFromGUI)
-
-
         # Buttons
         self.ui.applyButton.connect('clicked(bool)', self.onApplyButton)
 
@@ -164,7 +158,10 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         Called each time the user opens a different module.
         """
         # Do not react to parameter node changes (GUI wlil be updated when the user enters into the module)
-        self.removeObserver(self._parameterNode, vtk.vtkCommand.ModifiedEvent, self.updateGUIFromParameterNode)
+        if self._parameterNode:
+            self._parameterNode.disconnectGui(self._parameterNodeGuiTag)
+            self._parameterNodeGuiTag = None
+            self.removeObserver(self._parameterNode, vtk.vtkCommand.ModifiedEvent, self._checkCanApply)
 
     def onSceneStartClose(self, caller, event):
         """
@@ -191,10 +188,10 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.setParameterNode(self.logic.getParameterNode())
 
         # Select default input nodes if nothing is selected yet to save a few clicks for the user
-        if not self._parameterNode.GetNodeReference("InputVolume"):
+        if not self._parameterNode.inputVolume:
             firstVolumeNode = slicer.mrmlScene.GetFirstNodeByClass("vtkMRMLScalarVolumeNode")
             if firstVolumeNode:
-                self._parameterNode.SetNodeReferenceID("InputVolume", firstVolumeNode.GetID())
+                self._parameterNode.inputVolume = firstVolumeNode
 
     def setParameterNode(self, inputParameterNode):
         """
@@ -202,63 +199,26 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         Observation is needed because when the parameter node is changed then the GUI must be updated immediately.
         """
 
-        if inputParameterNode:
-            self.logic.setDefaultParameters(inputParameterNode)
-
-        # Unobserve previously selected parameter node and add an observer to the newly selected.
-        # Changes of parameter node are observed so that whenever parameters are changed by a script or any other module
-        # those are reflected immediately in the GUI.
-        if self._parameterNode is not None:
-            self.removeObserver(self._parameterNode, vtk.vtkCommand.ModifiedEvent, self.updateGUIFromParameterNode)
+        if self._parameterNode:
+            self._parameterNode.disconnectGui(self._parameterNodeGuiTag)
+            self.removeObserver(self._parameterNode, vtk.vtkCommand.ModifiedEvent, self._checkCanApply)
         self._parameterNode = inputParameterNode
-        if self._parameterNode is not None:
-            self.addObserver(self._parameterNode, vtk.vtkCommand.ModifiedEvent, self.updateGUIFromParameterNode)
 
-        # Initial GUI update
-        self.updateGUIFromParameterNode()
-
-    def updateGUIFromParameterNode(self, caller=None, event=None):
-        """
-        This method is called whenever parameter node is changed.
-        The module GUI is updated to show the current state of the parameter node.
-        """
-
-        if self._parameterNode is None or self._updatingGUIFromParameterNode:
-            return
-
-        # Make sure GUI changes do not call updateParameterNodeFromGUI (it could cause infinite loop)
-        self._updatingGUIFromParameterNode = True
-
-        # Update node selectors and sliders
-        self.ui.inputSelector.setCurrentNode(self._parameterNode.GetNodeReference("InputVolume"))
-        self.ui.outputSelector.setCurrentNode(self._parameterNode.GetNodeReference("OutputVolume"))
-
-        # Update buttons states and tooltips
-        if self._parameterNode.GetNodeReference("InputVolume") and self._parameterNode.GetNodeReference("OutputVolume"):
-            self.ui.applyButton.toolTip = "Compute segmented volume"
+        if self._parameterNode:
+            # Note: in the .ui file, a Qt dynamic property called "SlicerParameterName" is set on each
+            # ui element that needs connection.
+            self._parameterNodeGuiTag = self._parameterNode.connectGui(self.ui)
+            self.addObserver(self._parameterNode, vtk.vtkCommand.ModifiedEvent, self._checkCanApply)
+            self._checkCanApply()
+    
+    def _checkCanApply(self, caller=None, event=None) -> None:
+        if self._parameterNode and self._parameterNode.inputVolume and self_parameterNode.outputSegment:
+            self.ui.applyButton.toolTip = _("Compute output segment")
             self.ui.applyButton.enabled = True
         else:
-            self.ui.applyButton.toolTip = "Select input and output volume nodes"
+            self.ui.applyButton.toolTip = _("Select input and output nodes")
             self.ui.applyButton.enabled = False
 
-        # All the GUI updates are done
-        self._updatingGUIFromParameterNode = False
-
-    def updateParameterNodeFromGUI(self, caller=None, event=None):
-        """
-        This method is called when the user makes any change in the GUI.
-        The changes are saved into the parameter node (so that they are restored when the scene is saved and loaded).
-        """
-
-        if self._parameterNode is None or self._updatingGUIFromParameterNode:
-            return
-
-        wasModified = self._parameterNode.StartModify()  # Modify all properties in a single batch
-
-        self._parameterNode.SetNodeReferenceID("InputVolume", self.ui.inputSelector.currentNodeID)
-        self._parameterNode.SetNodeReferenceID("OutputVolume", self.ui.outputSelector.currentNodeID)
-
-        self._parameterNode.EndModify(wasModified)
 
     def onApplyButton(self):
         """
@@ -269,8 +229,8 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             self.ui.checkBox.checked = self.logic.hasValidParams
 
             # Compute output
-            self.logic.process(self.ui.inputSelector.currentNode(), self.ui.outputSelector.currentNode())
-
+            self.logic.process(self._parameterNode.inputVolume, self._parameterNode.outputSegment)
+        
             
 
 
