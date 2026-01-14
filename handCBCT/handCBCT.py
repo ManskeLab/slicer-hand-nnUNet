@@ -265,11 +265,13 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         Run processing when user clicks "Apply" button.
         """
         with slicer.util.tryWithErrorDisplay("Failed to compute results.", waitCursor=True):
+            # UI update (mostly for testing) to check whether provided model is valid.
+            self.ui.checkBox.checked = self.logic.hasValidParams
 
             # Compute output
             self.logic.process(self.ui.inputSelector.currentNode(), self.ui.outputSelector.currentNode())
 
-            self.ui.checkBox.checked = self.logic.hasValidParams
+            
 
 
 #
