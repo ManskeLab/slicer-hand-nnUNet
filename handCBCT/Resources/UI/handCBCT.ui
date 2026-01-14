@@ -52,6 +52,9 @@
         <property name="renameEnabled">
          <bool>true</bool>
         </property>
+        <property name="SlicerParameterName" stdset="0">
+         <string>inputVolume</string>
+        </property>
        </widget>
       </item>
       <item row="1" column="0">
@@ -91,11 +94,11 @@
         <property name="defaultText">
          <string>Select number of folds for model</string>
         </property>
-        <property name="defaultIcon">
-         <iconset theme="1"/>
-        </property>
         <property name="forceDefault" stdset="0">
          <bool>false</bool>
+        </property>
+        <property name="SlicerParameterName" stdset="0">
+         <string>foldCount</string>
         </property>
         <item>
          <property name="text">
@@ -155,6 +158,9 @@
         <property name="currentUserDataAsString">
          <string/>
         </property>
+        <property name="SlicerParameterName" stdset="0">
+         <string>deviceType</string>
+        </property>
         <item>
          <property name="text">
           <string>cuda</string>
@@ -184,7 +190,7 @@
       <item row="0" column="0">
        <widget class="QLabel" name="label_2">
         <property name="text">
-         <string>Segmented Volume:</string>
+         <string>Output Segmentation</string>
         </property>
        </widget>
       </item>
@@ -215,6 +221,9 @@
         </property>
         <property name="renameEnabled">
          <bool>false</bool>
+        </property>
+        <property name="SlicerParameterName" stdset="0">
+         <string>outputSegment</string>
         </property>
        </widget>
       </item>
