@@ -23,6 +23,6 @@ class handCBCTParameterNode:
 
     inputVolume: vtkMRMLScalarVolumeNode
     foldCount: Annotated[int, Choice([1, 2, 3, 4, 5])] = 1 # default to 1 for performance purposes
-    deviceType: Annotated[str, Choice(["cuda", "gpu", "mps"])] = "cuda"
+    deviceType: Annotated[str, Choice(["cuda", "cpu", "mps"])] = "cuda"
     outputSegment: vtkMRMLSegmentationNode
 
