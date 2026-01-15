@@ -4,6 +4,9 @@ set(MODULE_NAME handCBCT)
 #-----------------------------------------------------------------------------
 set(MODULE_PYTHON_SCRIPTS
   ${MODULE_NAME}.py
+  ${MODULE_NAME}Lib/__init__.py
+  ${MODULE_NAME}Lib/Logic.py
+  ${MODULE_NAME}Lib/Parameter.py
   )
 
 set(MODULE_PYTHON_RESOURCES
