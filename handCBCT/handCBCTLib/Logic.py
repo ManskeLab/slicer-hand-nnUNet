@@ -24,8 +24,9 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
     https://github.com/Slicer/Slicer/blob/master/Base/Python/slicer/ScriptedLoadableModule.py
     """
 
-
+    # model constants
     MODEL_CHECKPOINT = "checkpoint_final.pth"
+    MODEL_WEIGHT_NAME = "Dataset001_hand"
 
     def __init__(self):
       """
@@ -49,10 +50,15 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       """
       Run the processing algorithm.
       Can be used without GUI widget.
-      :param inputVolume: volume to be segmented (nii expected)
+
+      :param inputVolume: volume to be segmented (.nii expected)
+      :param foldCount: number of folds for nnunet
+      :param deviceType: device type used 
       :param outputVolume: segmentation result
 
+      See handCBCTParameterNode for more details
       """
+
       if not self.is_setup:
         self.setup()
 
@@ -65,7 +71,7 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       
       # TODO: enable modification of parameters, specifically the fold count. Integrate with parameter nodes, or provide an update function if run from GUI.
       self.segmentationLogic.startSegmentation(inputVolume)
-      
+      self.segmentationLogic.waitForSegmentationFinished()
       
       stopTime = time.time()
       logging.info(f'Processing completed in {stopTime-startTime:.2f} seconds')
@@ -140,15 +146,34 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       self._reloadParameters()
 
 
-    def downloadWeights(self) -> bool:
+    def downloadWeights(self, downloadAgain: bool = False) -> bool:
       """
       Download weights for nnUNet model, present on github.
-      
-      :return: boolean indicating success
+
+      :param downloadAgain: boolean switch to force download even if file already exists
+      :type downloadAgain: bool
+      :return: boolean indicating success of download
       :rtype: bool
       """
       
-      pass
+      # obtain release URL (adapted from https://github.com/gaudot/SlicerDentalSegmentator/blob/main/DentalSegmentator/DentalSegmentatorLib/PythonDependencyChecker.py)
+
+      from github import Github, GithubException
+      gh = Github()
+      repo = gh.get_repo("ManskeLab/slicer-hand-nnUNet")
+      assets = [asset for release in repo.get_releases() for asset in release.get_assets() if asset.name == handCBCTLogic.MODEL_WEIGHT_NAME + ".zip"]
+
+      url = assets[0].browser_download_url
+
+      if not (self.getModelPath() / handCBCTLogic.MODEL_WEIGHT_NAME).exists() or downloadAgain:
+        # download logic here
+
+
+        return True
+      else:
+        return False
+        
+
     
     def _reloadParameters(self) -> None:
       """
@@ -185,6 +210,9 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
     def hasValidParams(self) -> bool:
       """
       Validity of current model parameters as loaded from self.modelPath
+
+      :return: boolean value representing whether the current modelParameters are linked to a valid nnunet weights directory
+      :rtype: bool
       """
       if self.modelParameters:
         modelResponse = self.modelParameters.isValid()
@@ -192,3 +220,14 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
         return modelResponse[0]
       else:
         return False
+      
+    @property
+    def weightsExist(self) -> bool:
+      """
+      Docstring for weightsExist
+      
+      :return: boolean value representing whether weights directory exists (has been downloaded)
+      :rtype: bool
+      """
+
+      return (self.getModelPath() / handCBCTLogic.MODEL_WEIGHT_NAME).exists()
