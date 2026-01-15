@@ -1,14 +1,18 @@
 import logging
 from pathlib import Path
+
 import slicer
 import slicer.util
 from slicer.ScriptedLoadableModule import ScriptedLoadableModuleLogic
+from slicer import vtkMRMLScalarVolumeNode, vtkMRMLSegmentationNode
 
 from .Parameter import handCBCTParameterNode
 
 #
 # handCBCTLogic
 #
+
+
 
 class handCBCTLogic(ScriptedLoadableModuleLogic):
     """This class should implement all the actual
@@ -21,7 +25,7 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
     """
 
 
-    module_dir = slicer.util.modulePath("handCBCT")
+    MODEL_CHECKPOINT = "checkpoint_final.pth"
 
     def __init__(self):
       """
@@ -41,7 +45,7 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       """
       return handCBCTParameterNode(super().getParameterNode())
     
-    def process(self, inputVolume, outputSegment):
+    def process(self, inputVolume, foldCount, deviceType, outputSegment):
       """
       Run the processing algorithm.
       Can be used without GUI widget.
@@ -101,7 +105,9 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       self.segmentationLogic.errorOccurred.connect(slicer.util.errorDisplay)
       self.segmentationLogic.inferenceFinished.connect(self.segmentationLogic.loadSegmentation)
       
-      # finish set up 
+      # prepare nnunet Parameter
+      from SlicerNNUNetLib import Parameter
+      self.modelParameters = Parameter()
       self.loadWeights() # TODO: add download method for weights if not present
       self.is_setup = True
 
@@ -115,14 +121,14 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       if not self.dependenciesInstalled:
         self.installDependencies()
 
-      from SlicerNNUNetLib import Parameter, SegmentationLogic
 
       # get model path and create directory if it does not exist
       modelPath = self.getModelPath()
       modelPath.mkdir(parents = True, exists_ok = True)
 
 
-      self.modelParameters = Parameter(modelPath = modelPath)
+      self.modelParameters.modelPath = str(modelPath)
+      self.modelParameters.checkPointName = handCBCTLogic.MODEL_CHECKPOINT
 
       # testing purposes, check whether the directory is valid
       if self.hasValidParams:
@@ -130,8 +136,8 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       else:
         slicer.util.messageBox("Model directory is not valid.")
 
-      # attach loaded model parameters to segmentation logic
-      self.segmentationLogic.setParameter(self.modelParameters)
+      # attach updated model parameters to segmentation logic
+      self._reloadParameters()
 
 
     def downloadWeights(self) -> bool:
@@ -141,8 +147,19 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       :return: boolean indicating success
       :rtype: bool
       """
-
+      
       pass
+    
+    def _reloadParameters(self) -> None:
+      """
+      Reattach parameters to self.segmentationLogic
+
+      Call this when reconfiguring for parameter node values
+      """
+      if self.segmentationLogic and self.modelParameters:
+        self.segmentationLogic.setParameter(self.modelParameters)
+
+
     @staticmethod
     def getModelPath(self) -> Path:
       """
@@ -175,9 +192,3 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
         return modelResponse[0]
       else:
         return False
-      
-    
-
-      
-
-
