@@ -212,11 +212,11 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             self._checkCanApply()
     
     def _checkCanApply(self, caller=None, event=None) -> None:
-        if self._parameterNode and self._parameterNode.inputVolume and self_parameterNode.outputSegment:
-            self.ui.applyButton.toolTip = _("Compute output segment")
+        if self._parameterNode and self._parameterNode.inputVolume and self._parameterNode.outputSegment:
+            self.ui.applyButton.toolTip = "Compute output segment"
             self.ui.applyButton.enabled = True
         else:
-            self.ui.applyButton.toolTip = _("Select input and output nodes")
+            self.ui.applyButton.toolTip = "Select input and output nodes"
             self.ui.applyButton.enabled = False
 
 
