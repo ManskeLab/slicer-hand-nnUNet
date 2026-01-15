@@ -1,5 +1,5 @@
 import logging
-
+from pathlib import Path
 import slicer
 import slicer.util
 from slicer.ScriptedLoadableModule import ScriptedLoadableModuleLogic
@@ -20,59 +20,62 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
     https://github.com/Slicer/Slicer/blob/master/Base/Python/slicer/ScriptedLoadableModule.py
     """
 
-    def __init__(self):
-        """
-        Called when the logic class is instantiated. Can be used for initializing member variables.
-        """
-        ScriptedLoadableModuleLogic.__init__(self)
-        self.segmentationLogic = None
-        self.modelParameters = None
 
-        # flags for setup related tasks
-        self.dependenciesInstalled = False
-        self.is_setup = False
+    module_dir = slicer.util.modulePath("handCBCT")
+
+    def __init__(self):
+      """
+      Called when the logic class is instantiated. Can be used for initializing member variables.
+      """
+      ScriptedLoadableModuleLogic.__init__(self)
+      self.segmentationLogic = None
+      self.modelParameters = None
+
+      # flags for setup related tasks
+      self.dependenciesInstalled = False
+      self.is_setup = False
     
     def getParameterNode(self):
-       """
+      """
         Return a Parameter Node 
-       """
-       return handCBCTParameterNode(super().getParameterNode())
+      """
+      return handCBCTParameterNode(super().getParameterNode())
     
     def process(self, inputVolume, outputSegment):
-        """
-        Run the processing algorithm.
-        Can be used without GUI widget.
-        :param inputVolume: volume to be segmented (nii expected)
-        :param outputVolume: segmentation result
+      """
+      Run the processing algorithm.
+      Can be used without GUI widget.
+      :param inputVolume: volume to be segmented (nii expected)
+      :param outputVolume: segmentation result
 
-        """
-        if not self.is_setup:
-          self.setup()
+      """
+      if not self.is_setup:
+        self.setup()
 
-        if not inputVolume or not outputSegment:
-            raise ValueError("Input or output selected is invalid")
+      if not inputVolume or not outputSegment:
+        raise ValueError("Input or output selected is invalid")
 
-        import time
-        startTime = time.time()
-        logging.info('Processing started')
-        
-        # TODO: enable modification of parameters, specifically the fold count. Integrate with parameter nodes, or provide an update function if run from GUI.
-        self.segmentationLogic.startSegmentation(inputVolume)
-        
-        
-        stopTime = time.time()
-        logging.info(f'Processing completed in {stopTime-startTime:.2f} seconds')
-        
+      import time
+      startTime = time.time()
+      logging.info('Processing started')
+      
+      # TODO: enable modification of parameters, specifically the fold count. Integrate with parameter nodes, or provide an update function if run from GUI.
+      self.segmentationLogic.startSegmentation(inputVolume)
+      
+      
+      stopTime = time.time()
+      logging.info(f'Processing completed in {stopTime-startTime:.2f} seconds')
+      
 
     def installDependencies(self):
       """
       Install dependencies utilizing the SlicerNNuNet extension
       """
       try:
-          import SlicerNNUNetLib
+        import SlicerNNUNetLib
       except ModuleNotFoundError as err:
-          slicer.util.errorDisplay("This module requires the SlicerNNUNet extension. Please install it in Extension Manager.")
-          raise err
+        slicer.util.errorDisplay("This module requires the SlicerNNUNet extension. Please install it in Extension Manager.")
+        raise err
 
       from SlicerNNUNetLib import InstallLogic
       install_logic = InstallLogic()
@@ -113,29 +116,56 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
         self.installDependencies()
 
       from SlicerNNUNetLib import Parameter, SegmentationLogic
-      self.modelParameters = Parameter(modelPath = self.getModelPath())
+
+      # get model path and create directory if it does not exist
+      modelPath = self.getModelPath()
+      modelPath.mkdir(parents = True, exists_ok = True)
+
+
+      self.modelParameters = Parameter(modelPath = modelPath)
+
+      # testing purposes, check whether the directory is valid
       if self.hasValidParams:
         slicer.util.messageBox("Model directory is valid.")
       else:
         slicer.util.messageBox("Model directory is not valid.")
 
-
+      # attach loaded model parameters to segmentation logic
       self.segmentationLogic.setParameter(self.modelParameters)
 
-    @property
-    def modelPath(self):
+
+    def downloadWeights(self) -> bool:
+      """
+      Download weights for nnUNet model, present on github.
+      
+      :return: boolean indicating success
+      :rtype: bool
+      """
+
+      pass
+    @staticmethod
+    def getModelPath(self) -> Path:
       """
       Path to model directory.
-        
+
       Module should download weights folder to here.
       Provide this directory to SlicerNNUNetLib for module loading.
       """
-      from pathlib import Path
-      path = Path(__file__).parent
-      return path.joinpath("..", "Resources", "Model").resolve()
+      
+      return self.getCachePath() / "Model"
     
+    @staticmethod
+    def getCachePath() -> Path:
+      """
+      Path to cache directory for this module, use to store downloaded model weight
+      
+      :return: path to the module's cache directory
+      :rtype: pathlib.Path
+      """
+      return Path(slicer.app.cachePath) / "handCBCT"
+
     @property
-    def hasValidParams(self):
+    def hasValidParams(self) -> bool:
       """
       Validity of current model parameters as loaded from self.modelPath
       """
