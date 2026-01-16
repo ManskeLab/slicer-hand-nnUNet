@@ -114,7 +114,7 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       # prepare nnunet Parameter
       from SlicerNNUNetLib import Parameter
       self.modelParameters = Parameter()
-      self.loadWeights() # TODO: add download method for weights if not present
+      self.loadWeights() # loadWeights will download weights if not already downloaded
       self.is_setup = True
 
     def loadWeights(self):
@@ -128,9 +128,10 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
         self.installDependencies()
 
 
-      # get model path and create directory if it does not exist
-      modelPath = self.getModelPath()
-      modelPath.mkdir(parents = True, exists_ok = True)
+      # get model path and check if it exists, download if it does not exist
+      modelPath = self.getModelPath() / handCBCTLogic.MODEL_WEIGHT_NAME
+      if not modelPath.exists():
+        self.downloadWeights()
 
 
       self.modelParameters.modelPath = str(modelPath)
@@ -169,12 +170,12 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
 
       if not weightPath.exists() or downloadAgain:
 
-        if downloadAgain:
+        if downloadAgain and weightPath.exists():
           import shutil
           shutil.rmtree(weightPath)
 
         slicer.util.messageBox("Downloading model. This may take some time.")
-
+        weightPath.mkdir(parents = True)
 
         import requests
         session = requests.Session()
