@@ -290,28 +290,22 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="0">
+      <item row="1" column="1" alignment="Qt::AlignHCenter">
+       <widget class="QPushButton" name="loadButton">
+        <property name="text">
+         <string>Load Model</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
        <layout class="QHBoxLayout" name="horizontalLayout">
         <property name="spacing">
          <number>1</number>
         </property>
-        <item alignment="Qt::AlignHCenter">
-         <widget class="QLabel" name="label_3">
-          <property name="text">
-           <string>Model Directory</string>
-          </property>
-          <property name="scaledContents">
-           <bool>false</bool>
-          </property>
-          <property name="wordWrap">
-           <bool>false</bool>
-          </property>
-         </widget>
-        </item>
-        <item alignment="Qt::AlignLeft">
+        <item>
          <widget class="QCheckBox" name="checkBox">
           <property name="text">
-           <string>Valid</string>
+           <string>Model Directory Validity</string>
           </property>
          </widget>
         </item>
