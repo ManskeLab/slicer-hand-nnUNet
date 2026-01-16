@@ -231,7 +231,7 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             self.ui.checkBox.checked = self.logic.hasValidParams
 
             # Compute output
-            self.logic.process(self._parameterNode.inputVolume, self._parameterNode.outputSegment)
+            self.logic.process(self._parameterNode.inputVolume, self._parameterNode.foldCount, self._parameterNode.deviceType, self._parameterNode.outputSegment)
         
     def onStopButton(self):
         """
