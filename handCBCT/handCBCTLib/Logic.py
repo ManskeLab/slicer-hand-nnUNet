@@ -123,8 +123,8 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       from SlicerNNUNetLib import Parameter
       self.modelParameters = Parameter()
 
-      if not (self.getModelPath / handCBCTLogic.MODEL_WEIGHT_NAME).exists():
-        self.downloadWeights
+      if not (self.getModelPath() / handCBCTLogic.MODEL_WEIGHT_NAME).exists():
+        self.downloadWeights()
 
       self.loadWeights() # loadWeights will download weights if not already downloaded
       self.is_setup = True
@@ -139,7 +139,7 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       if not self.dependenciesInstalled:
         self.installDependencies()
 
-
+      
       # get model path and check if it exists, download if it does not exist
       modelPath = self.getModelPath() / handCBCTLogic.MODEL_WEIGHT_NAME
       if not modelPath.exists():
@@ -148,6 +148,10 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
         slicer.util.messageBox("Model directory does not exist.")
         return
 
+      if not self.modelParameters:
+        from SlicerNNUNetLib import Parameter
+        self.modelParameters = Parameter()
+      
       self.modelParameters.modelPath = modelPath
       self.modelParameters.checkPointName = handCBCTLogic.MODEL_CHECKPOINT
 
