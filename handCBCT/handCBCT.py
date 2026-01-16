@@ -138,6 +138,7 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.ui.startButton.connect('clicked(bool)', self.onStartButton)
         self.ui.stopButton.connect('clicked(bool)', self.onStopButton)
         self.ui.downloadButton.connect('clicked(bool)', self.onDownloadButton)
+        self.ui.loadButton.connect('clicked(bool)', self.onLoadButton)
 
         # Make sure parameter node is initialized (needed for module reload)
         self.initializeParameterNode()
@@ -249,7 +250,15 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         with slicer.util.tryWithErrorDisplay("Model download failed, try again later.", waitCursor = True):
             self.logic.downloadWeights(downloadAgain = True)
         
+    def onLoadButton(self):
+        """
+        Run weight loading logic when user clicks "Load Model" button
+        
+        Mainly for testing purposes
+        """
 
+        with slicer.util.tryWithErrorDisplay("Model loading failed.", waitCursor = True):
+            self.logic.loadWeights();
 
 #
 # handCBCTLogic moved to handCBCTLib.Logic
