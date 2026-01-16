@@ -134,7 +134,7 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
         self.downloadWeights()
 
 
-      self.modelParameters.modelPath = str(modelPath)
+      self.modelParameters.modelPath = modelPath
       self.modelParameters.checkPointName = handCBCTLogic.MODEL_CHECKPOINT
 
       # testing purposes, check whether the directory is valid
@@ -194,8 +194,10 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
         with zipfile.ZipFile(zipPath, "r") as f:
             f.extractall(weightPath)
 
+        slicer.util.messageBox("Download complete.")
         return True
       else:
+        slicer.util.messageBox("Already downloaded.")
         return False
         
 
@@ -211,7 +213,7 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
 
 
     @staticmethod
-    def getModelPath(self) -> Path:
+    def getModelPath() -> Path:
       """
       Path to model directory.
 
@@ -219,7 +221,7 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       Provide this directory to SlicerNNUNetLib for module loading.
       """
       
-      return self.getCachePath() / "Model"
+      return handCBCTLogic.getCachePath() / "Model"
     
     @staticmethod
     def getCachePath() -> Path:
