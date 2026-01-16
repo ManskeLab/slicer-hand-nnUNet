@@ -71,7 +71,9 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       
       # TODO: enable modification of parameters, specifically the fold count. Integrate with parameter nodes, or provide an update function if run from GUI.
       self.segmentationLogic.startSegmentation(inputVolume)
-      self.segmentationLogic.waitForSegmentationFinished()
+
+      # avoid blocking UI thread
+      # self.segmentationLogic.waitForSegmentationFinished()
       
       stopTime = time.time()
       logging.info(f'Processing completed in {stopTime-startTime:.2f} seconds')
@@ -114,6 +116,10 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       # prepare nnunet Parameter
       from SlicerNNUNetLib import Parameter
       self.modelParameters = Parameter()
+
+      if not (self.getModelPath / handCBCTLogic.MODEL_WEIGHT_NAME).exists():
+        self.downloadWeights
+        
       self.loadWeights() # loadWeights will download weights if not already downloaded
       self.is_setup = True
 
@@ -131,8 +137,9 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       # get model path and check if it exists, download if it does not exist
       modelPath = self.getModelPath() / handCBCTLogic.MODEL_WEIGHT_NAME
       if not modelPath.exists():
-        self.downloadWeights()
-
+        # avoid tying loading with download
+        # self.downloadWeights()
+        return
 
       self.modelParameters.modelPath = modelPath
       self.modelParameters.checkPointName = handCBCTLogic.MODEL_CHECKPOINT
