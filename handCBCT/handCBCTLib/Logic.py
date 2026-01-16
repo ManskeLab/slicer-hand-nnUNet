@@ -119,7 +119,7 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
 
       if not (self.getModelPath / handCBCTLogic.MODEL_WEIGHT_NAME).exists():
         self.downloadWeights
-        
+
       self.loadWeights() # loadWeights will download weights if not already downloaded
       self.is_setup = True
 
@@ -139,6 +139,7 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       if not modelPath.exists():
         # avoid tying loading with download
         # self.downloadWeights()
+        slicer.util.messageBox("Model directory does not exist.")
         return
 
       self.modelParameters.modelPath = modelPath
@@ -164,7 +165,7 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       :rtype: bool
       """
       
-      # obtain release URL (adapted from https://github.com/gaudot/SlicerDentalSegmentator/blob/main/DentalSegmentator/DentalSegmentatorLib/PythonDependencyChecker.py)
+      # obtain release URL (code adapted from https://github.com/gaudot/SlicerDentalSegmentator/blob/main/DentalSegmentator/DentalSegmentatorLib/PythonDependencyChecker.py)
 
       from github import Github, GithubException
       gh = Github()
