@@ -46,7 +46,7 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       """
       return handCBCTParameterNode(super().getParameterNode())
     
-    def process(self, inputVolume, foldCount, deviceType, outputSegment):
+    def process(self, inputVolume: vtkMRMLScalarVolumeNode, foldCount: int, deviceType: str, outputSegment: vtkMRMLSegmentationNode):
       """
       Run the processing algorithm.
       Can be used without GUI widget.
@@ -65,10 +65,15 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       if not inputVolume or not outputSegment:
         raise ValueError("Input or output selected is invalid")
 
+      self.modelParameters.folds = handCBCTLogic.produceFoldString(foldCount)
+      self.modelParameters.device = deviceType
+      self._reloadParameters()
+
       import time
       startTime = time.time()
       logging.info('Processing started')
       
+
       # TODO: enable modification of parameters, specifically the fold count. Integrate with parameter nodes, or provide an update function if run from GUI.
       self.segmentationLogic.startSegmentation(inputVolume)
 
@@ -111,7 +116,8 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       # connect Segmentation signals
       self.segmentationLogic.progressInfo.connect(print)
       self.segmentationLogic.errorOccurred.connect(slicer.util.errorDisplay)
-      self.segmentationLogic.inferenceFinished.connect(self.segmentationLogic.loadSegmentation)
+      self.segmentationLogic.inferenceFinished.connect(self.segmentationLogic.loadSegmentation) 
+      # TODO: reconfigure signal to connect to custom method; currently experiencing issues with loadSegmentation
       
       # prepare nnunet Parameter
       from SlicerNNUNetLib import Parameter
@@ -240,6 +246,27 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       :rtype: pathlib.Path
       """
       return Path(slicer.app.cachePath) / "handCBCT"
+
+
+    @staticmethod
+    def produceFoldString(folds: int) -> str:
+      """
+      Docstring for produceFoldString
+      
+      :param folds: number of folds to prepare string for
+      :return: string for input into SlicerNNuNet Parameter class representing fold count
+      :rtype: str
+      """
+
+      retval = ""
+
+      for i in range(0, folds):
+        if i != 0:
+          retval += ","
+        retval += str(i)
+
+      return retval
+
 
     @property
     def hasValidParams(self) -> bool:
