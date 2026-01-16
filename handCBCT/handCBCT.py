@@ -135,7 +135,9 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.addObserver(slicer.mrmlScene, slicer.mrmlScene.EndCloseEvent, self.onSceneEndClose)
 
         # Buttons
-        self.ui.applyButton.connect('clicked(bool)', self.onApplyButton)
+        self.ui.startButton.connect('clicked(bool)', self.onStartButton)
+        self.ui.stopButton.connect('clicked(bool)', self.onStopButton)
+        self.ui.downloadButton.connect('clicked(bool)', self.onDownloadButton)
 
         # Make sure parameter node is initialized (needed for module reload)
         self.initializeParameterNode()
@@ -161,7 +163,7 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         if self._parameterNode:
             self._parameterNode.disconnectGui(self._parameterNodeGuiTag)
             self._parameterNodeGuiTag = None
-            self.removeObserver(self._parameterNode, vtk.vtkCommand.ModifiedEvent, self._checkCanApply)
+            self.removeObserver(self._parameterNode, vtk.vtkCommand.ModifiedEvent, self._checkCanStart)
 
     def onSceneStartClose(self, caller, event):
         """
@@ -201,17 +203,17 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
         if self._parameterNode:
             self._parameterNode.disconnectGui(self._parameterNodeGuiTag)
-            self.removeObserver(self._parameterNode, vtk.vtkCommand.ModifiedEvent, self._checkCanApply)
+            self.removeObserver(self._parameterNode, vtk.vtkCommand.ModifiedEvent, self._checkCanStart)
         self._parameterNode = inputParameterNode
 
         if self._parameterNode:
             # Note: in the .ui file, a Qt dynamic property called "SlicerParameterName" is set on each
             # ui element that needs connection.
             self._parameterNodeGuiTag = self._parameterNode.connectGui(self.ui)
-            self.addObserver(self._parameterNode, vtk.vtkCommand.ModifiedEvent, self._checkCanApply)
-            self._checkCanApply()
+            self.addObserver(self._parameterNode, vtk.vtkCommand.ModifiedEvent, self._checkCanStart)
+            self._checkCanStart()
     
-    def _checkCanApply(self, caller=None, event=None) -> None:
+    def _checkCanStart(self, caller=None, event=None) -> None:
         if self._parameterNode and self._parameterNode.inputVolume and self._parameterNode.outputSegment:
             self.ui.startButton.toolTip = "Compute output segment"
             self.ui.startButton.enabled = True
@@ -220,9 +222,9 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             self.ui.startButton.enabled = False
 
 
-    def onApplyButton(self):
+    def onStartButton(self):
         """
-        Run processing when user clicks "Apply" button.
+        Run processing when user clicks "Start" button.
         """
         with slicer.util.tryWithErrorDisplay("Failed to compute results.", waitCursor=True):
             # UI update (mostly for testing) to check whether provided model is valid.
@@ -231,7 +233,22 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             # Compute output
             self.logic.process(self._parameterNode.inputVolume, self._parameterNode.outputSegment)
         
-            
+    def onStopButton(self):
+        """
+        Stop operation when user clicks "Stop" button
+        """
+        
+        # TODO: implement model stop/interrupt logic
+        pass
+    
+    def onDownloadButton(self):
+        """
+        Run download logic when user clicks "Download Model" button
+        """
+        
+        with slicer.util.tryWithErrorDisplay("Model download failed, try again later.", waitCursor = True):
+            self.logic.downloadWeights(downloadAgain = True)
+        
 
 
 #
