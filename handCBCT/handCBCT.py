@@ -229,7 +229,7 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         """
         with slicer.util.tryWithErrorDisplay("Failed to compute results.", waitCursor=True):
             # UI update (mostly for testing) to check whether provided model is valid.
-            self.ui.checkBox.checked = self.logic.hasValidParams
+            self.ui.checkBox.setChecked(self.logic.hasValidParams)
 
             # Compute output
             self.logic.process(self._parameterNode.inputVolume, self._parameterNode.foldCount, self._parameterNode.deviceType, self._parameterNode.outputSegment)
