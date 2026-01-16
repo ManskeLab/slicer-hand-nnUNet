@@ -164,10 +164,34 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       assets = [asset for release in repo.get_releases() for asset in release.get_assets() if asset.name == handCBCTLogic.MODEL_WEIGHT_NAME + ".zip"]
 
       url = assets[0].browser_download_url
+      
+      weightPath = self.getModelPath() / handCBCTLogic.MODEL_WEIGHT_NAME
 
-      if not (self.getModelPath() / handCBCTLogic.MODEL_WEIGHT_NAME).exists() or downloadAgain:
-        # download logic here
+      if not weightPath.exists() or downloadAgain:
 
+        if downloadAgain:
+          import shutil
+          shutil.rmtree(weightPath)
+
+        slicer.util.messageBox("Downloading model. This may take some time.")
+
+
+        import requests
+        session = requests.Session()
+        response = session.get(url, stream = True)
+        
+        response.raise_for_status()
+
+        zipPath = str(weightPath) + ".zip"
+        with open(zipPath, "wb") as f:
+          for chunk in response.iter_content(1024 * 1024):
+            f.write(chunk)
+
+
+        import zipfile
+        
+        with zipfile.ZipFile(zipPath, "r") as f:
+            f.extractall(weightPath)
 
         return True
       else:
