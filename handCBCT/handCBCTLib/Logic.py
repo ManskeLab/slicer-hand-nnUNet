@@ -115,8 +115,8 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
 
       # connect Segmentation signals
       self.segmentationLogic.progressInfo.connect(print)
-      self.segmentationLogic.errorOccurred.connect(slicer.util.errorDisplay)
-      self.segmentationLogic.inferenceFinished.connect(self.segmentationLogic.loadSegmentation) 
+      self.segmentationLogic.errorOccurred.connect(slicer.util.messageBox)
+      self.segmentationLogic.inferenceFinished.connect(self.util.messageBox) 
       # TODO: reconfigure signal to connect to custom method; currently experiencing issues with loadSegmentation
       
       # prepare nnunet Parameter
