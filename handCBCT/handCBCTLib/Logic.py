@@ -54,7 +54,7 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       :param inputVolume: volume to be segmented (.nii expected)
       :param foldCount: number of folds for nnunet
       :param deviceType: device type used 
-      :param outputVolume: segmentation result
+      :param outputSegment: segmentation result
 
       See handCBCTParameterNode for more details
       """
@@ -64,6 +64,8 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
 
       if not inputVolume or not outputSegment:
         raise ValueError("Input or output selected is invalid")
+
+      self.inputName = inputVolume.GetName()
 
       self.modelParameters.folds = handCBCTLogic.produceFoldString(foldCount)
       self.modelParameters.device = deviceType
@@ -115,8 +117,8 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
 
       # connect Segmentation signals
       self.segmentationLogic.progressInfo.connect(print)
-      self.segmentationLogic.errorOccurred.connect(slicer.util.messageBox)
-      self.segmentationLogic.inferenceFinished.connect(self.util.messageBox) 
+      self.segmentationLogic.errorOccurred.connect(slicer.util.errorDisplay)
+      self.segmentationLogic.inferenceFinished.connect(self._inferenceFinished) 
       # TODO: reconfigure signal to connect to custom method; currently experiencing issues with loadSegmentation
       
       # prepare nnunet Parameter
@@ -219,7 +221,15 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
         return False
         
 
-    
+    def _inferenceFinished(self, *args, **kwargs):
+      """
+      Wraps segmentationLogic.inferenceFinished to handle unexpected arguments
+      """
+
+      result: vtkMRMLSegmentationNode = self.segmentationLogic.loadSegmentation()
+      result.SetName(self.inputName + "_segment")
+      slicer.util.messageBox("Inference complete.")
+
     def _reloadParameters(self) -> None:
       """
       Reattach parameters to self.segmentationLogic
