@@ -231,6 +231,9 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             # UI update (mostly for testing) to check whether provided model is valid.
             self.ui.checkBox.setChecked(self.logic.hasValidParams)
 
+            self.ui.startButton.enabled = False
+            self.ui.stopButton.enabled = True
+
             # Compute output
             self.logic.process(self._parameterNode.inputVolume, self._parameterNode.foldCount, self._parameterNode.deviceType, self._parameterNode.outputSegment)
         
@@ -238,9 +241,10 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         """
         Stop operation when user clicks "Stop" button
         """
-        
+        self.logic.stopProcess()
+        slicer.util.messageBox("Stopping process.")
+
         # TODO: implement model stop/interrupt logic
-        pass
     
     def onDownloadButton(self):
         """
