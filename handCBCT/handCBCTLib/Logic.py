@@ -220,6 +220,8 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
         slicer.util.messageBox("Already downloaded.")
         return False
         
+    def stopProcess(self):
+      self.segmentationLogic.stopSegmentation()
 
     def _inferenceFinished(self, *args, **kwargs):
       """
