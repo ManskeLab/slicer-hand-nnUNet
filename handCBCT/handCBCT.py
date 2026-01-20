@@ -222,7 +222,6 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             self.ui.startButton.toolTip = "Select input and output nodes"
             self.ui.startButton.enabled = False
 
-
     def onStartButton(self):
         """
         Run processing when user clicks "Start" button.
@@ -236,15 +235,22 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
             # Compute output
             self.logic.process(self._parameterNode.inputVolume, self._parameterNode.foldCount, self._parameterNode.deviceType, self._parameterNode.outputSegment)
+
+
         
     def onStopButton(self):
         """
         Stop operation when user clicks "Stop" button
         """
-        self.logic.stopProcess()
-        slicer.util.messageBox("Stopping process.")
+        with slicer.util.tryWithErrorDisplay("Stop process failed.", waitCursor = True):
+            self.logic.stopProcess()
+            slicer.util.messageBox("Stopping process.")
+            
+            self.ui.stopButton.enabled = False
+            self.ui.startButton.enabled = True
+        
+        
 
-        # TODO: implement model stop/interrupt logic
     
     def onDownloadButton(self):
         """
