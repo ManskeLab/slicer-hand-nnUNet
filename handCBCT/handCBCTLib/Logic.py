@@ -85,7 +85,10 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       stopTime = time.time()
       logging.info(f'Processing completed in {stopTime-startTime:.2f} seconds')
       
-
+    def stopProcess(self):
+      self.segmentationLogic.stopSegmentation()
+      
+      
     def installDependencies(self):
       """
       Install dependencies utilizing the SlicerNNuNet extension
@@ -220,8 +223,7 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
         slicer.util.messageBox("Already downloaded.")
         return False
         
-    def stopProcess(self):
-      self.segmentationLogic.stopSegmentation()
+
 
     def _inferenceFinished(self, *args, **kwargs):
       """
@@ -229,7 +231,7 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       """
 
       result: vtkMRMLSegmentationNode = self.segmentationLogic.loadSegmentation()
-      result.SetName(self.inputName + "_segment")
+      result.SetName(self.inputName + "_segmentation")
       slicer.util.messageBox("Inference complete.")
 
     def _reloadParameters(self) -> None:
