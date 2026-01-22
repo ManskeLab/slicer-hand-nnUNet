@@ -170,11 +170,12 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       self._reloadParameters()
 
 
-    def downloadWeights(self, downloadAgain: bool = False) -> bool:
+    def downloadWeights(self, downloadAgain: bool = False, progressBar = None) -> bool:
       """
       Download weights for nnUNet model, present on github.
 
       :param downloadAgain: boolean switch to force download even if file already exists
+      :param progressBar: optionally provide a slier progressBar to update
       :type downloadAgain: bool
       :return: boolean indicating success of download
       :rtype: bool
@@ -207,8 +208,16 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
         response.raise_for_status()
 
         zipPath = str(weightPath) + ".zip"
+
+        update_bar = False if progressBar is None else True
+
         with open(zipPath, "wb") as f:
+          i = 0
           for chunk in response.iter_content(1024 * 1024):
+            i += 1
+            if update_bar:
+                update_bar.value = i / 1024
+                slicer.app.processEvents()
             f.write(chunk)
 
 

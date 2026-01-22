@@ -304,7 +304,8 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         """
         
         with slicer.util.tryWithErrorDisplay("Model download failed, try again later.", waitCursor = True):
-            self.logic.downloadWeights(downloadAgain = True)
+            progress_bar = slicer.util.createProgressDialog(windowTitle='Download model...', autoClose=False)
+            self.logic.downloadWeights(downloadAgain = True, progressBar = progress_bar)
         
     def onLoadButton(self):
         """
