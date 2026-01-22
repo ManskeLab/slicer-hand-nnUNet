@@ -139,12 +139,12 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.ui.stopButton.connect('clicked(bool)', self.onStopButton)
         self.ui.downloadButton.connect('clicked(bool)', self.onDownloadButton)
         self.ui.loadButton.connect('clicked(bool)', self.onLoadButton)
-        self.ui.showButton.toggled.connect('clicked(bool)', self.onShowButton)
+        self.ui.showButton.toggled.connect(self.onShowButton)
         
         
-        # Selectors TODO
-        # self.ui.volumeSelector.connect('currentNodeChanged(vtkMRMLNode*)', self.onVolumeNodeChanged)
-        # self.ui.segmentSelector.connect('currentNodeChanged(vtkMRMLNode*)', self.onSegmentNodeChanged)
+        # Selectors
+        self.ui.volumeSelector.connect('currentNodeChanged(vtkMRMLNode*)', self.onVolumeNodeChanged)
+        self.ui.segmentSelector.connect('currentNodeChanged(vtkMRMLNode*)', self.onSegmentNodeChanged)
         
         
         # Make sure parameter node is initialized (needed for module reload)
@@ -273,12 +273,13 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             self.ui.stopButton.enabled = False
             self.ui.startButton.enabled = True
         
-    def onShowButton(self, toggled = False):
+    def onShowButton(self, toggled = True):
         """
         Show 3D segmentation button click logic
         
         :param toggled: to toggle display on or off
         """
+        print(toggled)
         
         segmentationNode = self.ui.segmentSelector.currentNode()
         if not segmentationNode:
@@ -292,10 +293,9 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             slicer.util.messageBox("Something went wrong when obtaining segmentation display nodes.")
             return
         
+        segmentation = segmentationNode.GetSegmentation()
+        segmentation.CreateRepresentation("Closed surface")
         displayNode.SetVisibility3D(toggled)
-        
-        
-        
 
     
     def onDownloadButton(self):
@@ -317,6 +317,39 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         with slicer.util.tryWithErrorDisplay("Model loading failed.", waitCursor = True):
             self.logic.loadWeights();
 
+    def onVolumeNodeChanged(self, node):
+        """
+        Callback method for changes in input volume node selection
+        
+        Sets the current volume in viewer to the new selection
+        
+        Do not rely on parameter node, this may be changed to connect to another selector 
+        """
+        
+        if node:
+            appLogic = slicer.app.applicationLogic()
+            selection = appLogic.GetSelectionNode()
+            
+            selection.SetReferenceActiveVolumeID(node.GetID)
+            appLogic.PropogateSelection()
+        
+        
+    
+    def onSegmentNodeChanged(self, node):
+        """
+        Callback method for changes in selected segmentation node
+        
+        Sets new selected segmentation node to 2D viewer and segment table view
+        """
+        
+        if node:
+            self.ui.segmentsTableView.setSegmentationNode(node)
+            node.CreateDefaultDisplayNodes()
+            display = node.GetDisplayNode()
+            if display:
+                display.SetVisibility2D(True)
+                display.SetVisibility3D(True)
+        
 #
 # handCBCTLogic moved to handCBCTLib.Logic
 #

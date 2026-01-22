@@ -78,6 +78,7 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
 
       # TODO: enable modification of parameters, specifically the fold count. Integrate with parameter nodes, or provide an update function if run from GUI.
       self.segmentationLogic.startSegmentation(inputVolume)
+      self.segmentResult = outputSegment
 
       # avoid blocking UI thread
       # self.segmentationLogic.waitForSegmentationFinished()
@@ -240,7 +241,10 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       """
 
       result: vtkMRMLSegmentationNode = self.segmentationLogic.loadSegmentation()
-      result.SetName(self.inputName + "_segmentation")
+      
+      destination_segment = self.segmentResult.GetSegmentation()
+      destination_segment.DeepCopy(result)
+      
       slicer.util.messageBox("Inference complete.")
 
     def _reloadParameters(self) -> None:
