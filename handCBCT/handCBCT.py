@@ -139,7 +139,14 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.ui.stopButton.connect('clicked(bool)', self.onStopButton)
         self.ui.downloadButton.connect('clicked(bool)', self.onDownloadButton)
         self.ui.loadButton.connect('clicked(bool)', self.onLoadButton)
-
+        self.ui.showButton.toggled.connect('clicked(bool)', self.onShowButton)
+        
+        
+        # Selectors TODO
+        # self.ui.volumeSelector.connect('currentNodeChanged(vtkMRMLNode*)', self.onVolumeNodeChanged)
+        # self.ui.segmentSelector.connect('currentNodeChanged(vtkMRMLNode*)', self.onSegmentNodeChanged)
+        
+        
         # Make sure parameter node is initialized (needed for module reload)
         self.initializeParameterNode()
 
@@ -212,9 +219,26 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             # ui element that needs connection.
             self._parameterNodeGuiTag = self._parameterNode.connectGui(self.ui)
             self.addObserver(self._parameterNode, vtk.vtkCommand.ModifiedEvent, self._checkCanStart)
+            self.addObserver(self._parameterNode, vtk.vtkCommand.ModifiedEvent, self._checkCanShow)
+            self._checkCanShow()
             self._checkCanStart()
     
+    def _checkCanShow(self, caller=None, event=None) -> None:
+        """
+        Callback to check whether to enable show segmentation menu
+        """        
+        if self._parameterNode and self._parameterNode.outputSegment:
+            self.ui.showButton.setCheckable(True)
+            self.ui.showButton.enabled = True
+        else:
+            self.ui.showButton.setCheckable(False)
+            self.ui.showButton.enabled = False
+        
+        
     def _checkCanStart(self, caller=None, event=None) -> None:
+        """
+        Callback to check whether to enable start button (are the relevant parameters set?)
+        """
         if self._parameterNode and self._parameterNode.inputVolume and self._parameterNode.outputSegment:
             self.ui.startButton.toolTip = "Compute output segment"
             self.ui.startButton.enabled = True
@@ -248,6 +272,28 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             
             self.ui.stopButton.enabled = False
             self.ui.startButton.enabled = True
+        
+    def onShowButton(self, toggled = False):
+        """
+        Show 3D segmentation button click logic
+        
+        :param toggled: to toggle display on or off
+        """
+        
+        segmentationNode = self.ui.segmentSelector.currentNode()
+        if not segmentationNode:
+            slicer.util.messageBox("No segment selected.")
+            return
+        
+        segmentationNode.CreateDefaultDisplayNodes()
+        displayNode = segmentationNode.GetDisplayNode()
+        
+        if not displayNode:
+            slicer.util.messageBox("Something went wrong when obtaining segmentation display nodes.")
+            return
+        
+        displayNode.SetVisibility3D(toggled)
+        
         
         
 
