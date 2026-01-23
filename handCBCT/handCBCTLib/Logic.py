@@ -193,6 +193,8 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       
       weightPath = self.getModelPath() / handCBCTLogic.MODEL_WEIGHT_NAME
 
+
+      # check whether to download 
       if not weightPath.exists() or downloadAgain:
 
         if downloadAgain and weightPath.exists():
@@ -212,6 +214,7 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
 
         update_bar = False if progressBar is None else True
 
+        # write to zipPath in chunks
         with open(zipPath, "wb") as f:
           i = 0
           for chunk in response.iter_content(1024 * 1024):
