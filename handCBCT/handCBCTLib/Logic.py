@@ -35,6 +35,9 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       :param log_method: provide a method for logging output
       """
       ScriptedLoadableModuleLogic.__init__(self)
+      
+      # attributes
+      self.log_method = log_method # TODO: change current messages which create UI elements (ie. MessageBox) to use log_method
       self.segmentationLogic = None
       self.modelParameters = None
       self.segmentResult = None
@@ -254,7 +257,9 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
 
     def _inferenceFinished(self, *args, **kwargs):
       """
-      Wraps segmentationLogic.inferenceFinished to handle unexpected arguments
+      Wraps segmentationLogic.inferenceFinished
+      
+      Load in returned segmentation from loadSegmentation to segmentResult
       """
       
       if not self.segmentResult or not self.segmentResult.IsA("vtkMRMLSegmentationNode"):
@@ -263,8 +268,13 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       
       result: vtkMRMLSegmentationNode = self.segmentationLogic.loadSegmentation()
       
+      if not result:
+        slicer.util.errorDisplay("Inference finshed, but not segmentation was generated.")
+      
       destination_segment = self.segmentResult.GetSegmentation()
       destination_segment.DeepCopy(result.GetSegmentation())
+      
+      # TODO: deal with the temporary loaded segmentation
       
       slicer.util.messageBox("Inference complete.")
       
