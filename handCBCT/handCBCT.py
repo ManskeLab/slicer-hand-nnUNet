@@ -304,7 +304,23 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         """
         
         with slicer.util.tryWithErrorDisplay("Model download failed, try again later.", waitCursor = True):
-            progress_bar = slicer.util.createProgressDialog(windowTitle='Download model...', autoClose=False)
+            progress_bar = slicer.util.createProgressDialog(
+                parent=slicer.util.mainWindow(),
+                windowTitle='Model Download', 
+                autoClose=True, 
+                minimum = 0, 
+            )
+
+
+            # bring progress window to the foreground
+            progress_bar.setCancelButton(None) 
+            progress_bar.show()
+            progress_bar.raise_()
+            progress_bar.activateWindow()
+
+            slicer.app.processEvents()
+
+            # run download process
             self.logic.downloadWeights(downloadAgain = True, progressBar = progress_bar)
         
     def onLoadButton(self):
@@ -316,6 +332,7 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
         with slicer.util.tryWithErrorDisplay("Model loading failed.", waitCursor = True):
             self.logic.loadWeights();
+            self.ui.checkBox.setChecked(self.logic.hasValidParams)
 
     def onVolumeNodeChanged(self, node):
         """

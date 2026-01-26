@@ -123,7 +123,7 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       self.segmentationLogic.progressInfo.connect(print)
       self.segmentationLogic.errorOccurred.connect(slicer.util.errorDisplay)
       self.segmentationLogic.inferenceFinished.connect(self._inferenceFinished) 
-      # TODO: reconfigure signal to connect to custom method; currently experiencing issues with loadSegmentation
+      # TODO: reconfigure signal to connect to custom method; currently experiencing issues with loadSegmentation [fixed]
       
       # prepare nnunet Parameter
       from SlicerNNUNetLib import Parameter
@@ -201,7 +201,12 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
           import shutil
           shutil.rmtree(weightPath)
 
-        slicer.util.messageBox("Downloading model. This may take some time.")
+        # message output
+        if progressBar:
+          progressBar.setLabelText("Downloading model. This may take some time.")
+        else:
+          slicer.util.messageBox("Downloading model. This may take some time.")
+
         weightPath.mkdir(parents = True)
 
         import requests
@@ -212,15 +217,18 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
 
         zipPath = str(weightPath) + ".zip"
 
-        update_bar = False if progressBar is None else True
+        # set maximum 
+        if progressBar:
+          progressBar.maximum = int(assets[0].size)
 
+        
         # write to zipPath in chunks
         with open(zipPath, "wb") as f:
-          i = 0
+          downloaded = 0
           for chunk in response.iter_content(1024 * 1024):
-            i += 1
-            if update_bar:
-                update_bar.value = i / 1024
+            downloaded += len(chunk)
+            if progressBar:
+                progressBar.value = downloaded
                 slicer.app.processEvents()
             f.write(chunk)
 
@@ -246,7 +254,7 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       result: vtkMRMLSegmentationNode = self.segmentationLogic.loadSegmentation()
       
       destination_segment = self.segmentResult.GetSegmentation()
-      destination_segment.DeepCopy(result)
+      destination_segment.DeepCopy(result.GetSegmentation())
       
       slicer.util.messageBox("Inference complete.")
 
