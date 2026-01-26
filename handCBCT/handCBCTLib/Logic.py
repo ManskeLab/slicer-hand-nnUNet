@@ -28,13 +28,16 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
     MODEL_CHECKPOINT = "checkpoint_final.pth"
     MODEL_WEIGHT_NAME = "Dataset001_hand"
 
-    def __init__(self):
+    def __init__(self, log_method):
       """
       Called when the logic class is instantiated. Can be used for initializing member variables.
+      
+      :param log_method: provide a method for logging output
       """
       ScriptedLoadableModuleLogic.__init__(self)
       self.segmentationLogic = None
       self.modelParameters = None
+      self.segmentResult = None
 
       # flags for setup related tasks
       self.dependenciesInstalled = False
@@ -83,9 +86,6 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       # avoid blocking UI thread
       # self.segmentationLogic.waitForSegmentationFinished()
       
-      stopTime = time.time()
-      logging.info(f'Processing completed in {stopTime-startTime:.2f} seconds')
-      
     def stopProcess(self):
       self.segmentationLogic.stopSegmentation()
       
@@ -103,8 +103,12 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       from SlicerNNUNetLib import InstallLogic
       install_logic = InstallLogic()
       install_logic.progressInfo.connect(print) # TODO: review later whether we wish to log somewhere else
-      install_logic.setupPythonRequirements()
-
+      try:
+        install_logic.setupPythonRequirements()
+      except Exception as e:
+        slicer.util.errorDisplay("Error occurred while downloading requirements.")
+        raise e
+      
       self.dependenciesInstalled = True
 
     def setup(self):
@@ -250,13 +254,18 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       """
       Wraps segmentationLogic.inferenceFinished to handle unexpected arguments
       """
-
+      
+      if not self.segmentResult or not self.segmentResult.IsA("vtkMRMLSegmentationNode"):
+        slicer.util.errorDisplay("No destination segmentation node set.")
+        return
+      
       result: vtkMRMLSegmentationNode = self.segmentationLogic.loadSegmentation()
       
       destination_segment = self.segmentResult.GetSegmentation()
       destination_segment.DeepCopy(result.GetSegmentation())
       
       slicer.util.messageBox("Inference complete.")
+      
 
     def _reloadParameters(self) -> None:
       """

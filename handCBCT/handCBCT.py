@@ -126,7 +126,7 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
         # Create logic class. Logic implements all computations that should be possible to run
         # in batch mode, without a graphical user interface.
-        self.logic = handCBCTLogic()
+        self.logic = handCBCTLogic(print) # TODO: connect this to messageBox, make appropriate changes in logic
 
         # Connections
 
@@ -172,6 +172,7 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             self._parameterNode.disconnectGui(self._parameterNodeGuiTag)
             self._parameterNodeGuiTag = None
             self.removeObserver(self._parameterNode, vtk.vtkCommand.ModifiedEvent, self._checkCanStart)
+            self.removeObserver(self._parameterNode, vtk.vtkCommand.ModifiedEvent, self._checkCanShow)
 
     def onSceneStartClose(self, caller, event):
         """
@@ -228,10 +229,10 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         Callback to check whether to enable show segmentation menu
         """        
         if self._parameterNode and self._parameterNode.outputSegment:
-            self.ui.showButton.setCheckable(True)
+            # self.ui.showButton.setCheckable(True)
             self.ui.showButton.enabled = True
         else:
-            self.ui.showButton.setCheckable(False)
+            # self.ui.showButton.setCheckable(False)
             self.ui.showButton.enabled = False
         
         
@@ -298,7 +299,7 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         
         :param toggled: to toggle display on or off
         """
-        print(toggled)
+        # print(toggled)
         
         segmentationNode = self.ui.segmentSelector.currentNode()
         if not segmentationNode:
@@ -312,8 +313,8 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             slicer.util.messageBox("Something went wrong when obtaining segmentation display nodes.")
             return
         
-        segmentation = segmentationNode.GetSegmentation()
-        segmentation.CreateRepresentation("Closed surface")
+        if toggled:
+            slicer.vtkSlicerSegmentationsModuleLogic.CreateClosedSurfaceRepresentation(segmentationNode)
         displayNode.SetVisibility3D(toggled)
 
     
@@ -366,8 +367,8 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             appLogic = slicer.app.applicationLogic()
             selection = appLogic.GetSelectionNode()
             
-            selection.SetReferenceActiveVolumeID(node.GetID)
-            appLogic.PropogateSelection()
+            selection.SetReferenceActiveVolumeID(node.GetID())
+            appLogic.PropagateVolumeSelection()
         
         
     
@@ -384,7 +385,7 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             display = node.GetDisplayNode()
             if display:
                 display.SetVisibility2D(True)
-                display.SetVisibility3D(True)
+                display.SetVisibility3D(self.ui.showButton.isChecked())
         
 #
 # handCBCTLogic moved to handCBCTLib.Logic
