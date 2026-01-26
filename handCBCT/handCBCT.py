@@ -369,6 +369,9 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             
             selection.SetReferenceActiveVolumeID(node.GetID())
             appLogic.PropagateVolumeSelection()
+
+            volName = node.GetName() or "Volume"
+            self.ui.segmentSelector.baseName = f"{volName}_seg"
         
         
     
