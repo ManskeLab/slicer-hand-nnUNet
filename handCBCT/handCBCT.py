@@ -223,7 +223,7 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             self._checkCanShow()
             self._checkCanStart()
     
-    def _checkCanShow(self, caller=None, event=None) -> None:
+    def _checkCanShow(self, caller = None, event = None) -> None:
         """
         Callback to check whether to enable show segmentation menu
         """        
@@ -235,7 +235,7 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             self.ui.showButton.enabled = False
         
         
-    def _checkCanStart(self, caller=None, event=None) -> None:
+    def _checkCanStart(self, caller = None, event = None) -> None:
         """
         Callback to check whether to enable start button (are the relevant parameters set?)
         """
@@ -245,6 +245,20 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         else:
             self.ui.startButton.toolTip = "Select input and output nodes"
             self.ui.startButton.enabled = False
+
+    def _toggleSelectors(self, enable = True):
+        """
+        Helper method to toggle selectors on and off 
+
+        Key use is to prevent changing of parameters when process is running
+        
+        :param enable: Enable selectors
+        """
+        self.ui.volumeSelector.enabled = enable
+        self.ui.segmentSelector.enabled = enable
+
+        return
+
 
     def onStartButton(self):
         """
@@ -256,6 +270,7 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
             self.ui.startButton.enabled = False
             self.ui.stopButton.enabled = True
+            self._toggleSelectors(False)
 
             # Compute output
             self.logic.process(self._parameterNode.inputVolume, self._parameterNode.foldCount, self._parameterNode.deviceType, self._parameterNode.outputSegment)
@@ -272,6 +287,8 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             
             self.ui.stopButton.enabled = False
             self.ui.startButton.enabled = True
+
+            self._toggleSelectors(True)
         
     def onShowButton(self, toggled = True):
         """
