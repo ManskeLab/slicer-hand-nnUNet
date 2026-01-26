@@ -256,6 +256,8 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         """
         self.ui.volumeSelector.enabled = enable
         self.ui.segmentSelector.enabled = enable
+        self.ui.foldSelector.enabled = enable
+        self.ui.deviceSelector.enabled = enable
 
         return
 
