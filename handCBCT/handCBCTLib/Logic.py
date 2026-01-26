@@ -61,34 +61,36 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
 
       See handCBCTParameterNode for more details
       """
-
+      # check whether model has been configured
       if not self.is_setup:
         self.setup()
-
+    
+      if not self.hasValidParams:
+        raise RuntimeError("Invalid Model! Try downloading again.")
+    
+    
+      # check valid inputs
       if not inputVolume or not outputSegment:
         raise ValueError("Input or output selected is invalid")
 
-      self.inputName = inputVolume.GetName()
-
+      self.inputName = inputVolume.GetName() # unused
+      self.segmentResult = outputSegment
+      
+      # update parameters
       self.modelParameters.folds = handCBCTLogic.produceFoldString(foldCount)
       self.modelParameters.device = deviceType
       self._reloadParameters()
-
-      import time
-      startTime = time.time()
-      logging.info('Processing started')
       
+      logging.info('Processing started')
 
-      # TODO: enable modification of parameters, specifically the fold count. Integrate with parameter nodes, or provide an update function if run from GUI.
+      # begin segmentation
       self.segmentationLogic.startSegmentation(inputVolume)
-      self.segmentResult = outputSegment
-
-      # avoid blocking UI thread
-      # self.segmentationLogic.waitForSegmentationFinished()
       
     def stopProcess(self):
+      """
+      Stops the segmentation process
+      """
       self.segmentationLogic.stopSegmentation()
-      
       
     def installDependencies(self):
       """
@@ -308,16 +310,8 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       :return: string for input into SlicerNNuNet Parameter class representing fold count
       :rtype: str
       """
-
-      retval = ""
-
-      for i in range(0, folds):
-        if i != 0:
-          retval += ","
-        retval += str(i)
-
-      return retval
-
+      
+      return ",".join(str(i) for i in range(folds))
 
     @property
     def hasValidParams(self) -> bool:
@@ -329,7 +323,6 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       """
       if self.modelParameters:
         modelResponse = self.modelParameters.isValid()
-        print(modelResponse[1])
         return modelResponse[0]
       else:
         return False
