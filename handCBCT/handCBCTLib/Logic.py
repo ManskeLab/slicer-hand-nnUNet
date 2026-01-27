@@ -136,7 +136,7 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       self.segmentationLogic = SegmentationLogic()
 
       # connect Segmentation signals
-      self.segmentationLogic.progressInfo.connect(self.log_method)
+      self.segmentationLogic.progressInfo.connect(print) # do not connect this to UI elements
       self.segmentationLogic.errorOccurred.connect(self.error_method)
       self.segmentationLogic.inferenceFinished.connect(self._inferenceFinished) 
       # TODO: reconfigure signal to connect to custom method; currently experiencing issues with loadSegmentation [fixed]
@@ -151,12 +151,14 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       self.loadWeights() # loadWeights will download weights if not already downloaded
       self.is_setup = True
 
-    def loadWeights(self):
+    def loadWeights(self, loadAgain: bool = False):
       """
       Load weights for nnUNet from folder
       Folder specifications: https://github.com/KitwareMedical/SlicerNNUnet?tab=readme-ov-file#expected-weight-folder-structure
 
       See the SlicerNNUNetLib Parameter class for more details
+
+      :param loadAgain: boolean switch to force loading again
       """
       if not self.dependenciesInstalled:
         self.installDependencies()
@@ -167,10 +169,10 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       if not modelPath.exists():
         # avoid tying loading with download
         # self.downloadWeights()
-        self.log_method("Model directory does not exist.")
+        self.log_method("Model directory does not exist. Try downloading.")
         return
 
-      if not self.modelParameters:
+      if not self.modelParameters or loadAgain:
         from SlicerNNUNetLib import Parameter
         self.modelParameters = Parameter()
       

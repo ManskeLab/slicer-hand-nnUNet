@@ -351,7 +351,7 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         """
 
         with slicer.util.tryWithErrorDisplay("Model loading failed.", waitCursor = True):
-            self.logic.loadWeights();
+            self.logic.loadWeights(True); # force reload
             self.ui.checkBox.setChecked(self.logic.hasValidParams)
 
     def onVolumeNodeChanged(self, node):
