@@ -126,7 +126,7 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
         # Create logic class. Logic implements all computations that should be possible to run
         # in batch mode, without a graphical user interface.
-        self.logic = handCBCTLogic(print) # TODO: connect this to messageBox, make appropriate changes in logic
+        self.logic = handCBCTLogic(slicer.util.messageBox, slicer.util.errorDisplay, self.onInferenceFinished) 
 
         # Connections
 
@@ -389,7 +389,14 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             if display:
                 display.SetVisibility2D(True)
                 display.SetVisibility3D(self.ui.showButton.isChecked())
-        
+    
+    def onInferenceFinished(self):
+        """
+        Simple callback for inference finish to re-enable selectors
+        """
+
+        self._toggleSelectors(True)
+
 #
 # handCBCTLogic moved to handCBCTLib.Logic
 #

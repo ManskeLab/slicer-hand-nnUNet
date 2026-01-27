@@ -28,7 +28,7 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
     MODEL_CHECKPOINT = "checkpoint_final.pth"
     MODEL_WEIGHT_NAME = "Dataset001_hand"
 
-    def __init__(self, log_method, error_method):
+    def __init__(self, log_method, error_method, finish_signal = None):
       """
       Called when the logic class is instantiated. Can be used for initializing member variables.
       
@@ -38,8 +38,13 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       ScriptedLoadableModuleLogic.__init__(self)
       
       # attributes
+      self.finish_signal = finish_signal
       self.log_method = log_method # TODO: change current messages which create UI elements (ie. MessageBox) to use log_method
       self.error_method = error_method
+
+      assert(callable(log_method))
+      assert(callable(error_method))
+
       self.segmentationLogic = None
       self.modelParameters = None
       self.segmentResult = None
@@ -279,6 +284,11 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       # TODO: deal with the temporary loaded segmentation
       
       self.log_method("Inference complete.")
+
+
+      # call finish signal if defined
+      if self.finish_signal:
+        self.finish_signal()
       
 
     def _reloadParameters(self) -> None:
