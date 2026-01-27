@@ -28,16 +28,18 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
     MODEL_CHECKPOINT = "checkpoint_final.pth"
     MODEL_WEIGHT_NAME = "Dataset001_hand"
 
-    def __init__(self, log_method):
+    def __init__(self, log_method, error_method):
       """
       Called when the logic class is instantiated. Can be used for initializing member variables.
       
       :param log_method: provide a method for logging output
+      :param error_method: provide a method for providing error messages
       """
       ScriptedLoadableModuleLogic.__init__(self)
       
       # attributes
       self.log_method = log_method # TODO: change current messages which create UI elements (ie. MessageBox) to use log_method
+      self.error_method = error_method
       self.segmentationLogic = None
       self.modelParameters = None
       self.segmentResult = None
@@ -102,7 +104,7 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       try:
         import SlicerNNUNetLib
       except ModuleNotFoundError as err:
-        slicer.util.errorDisplay("This module requires the SlicerNNUNet extension. Please install it in Extension Manager.")
+        self.error_method("This module requires the SlicerNNUNet extension. Please install it in Extension Manager.")
         raise err
 
       from SlicerNNUNetLib import InstallLogic
@@ -111,7 +113,7 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       try:
         install_logic.setupPythonRequirements()
       except Exception as e:
-        slicer.util.errorDisplay("Error occurred while downloading requirements.")
+        self.error_method("Error occurred while downloading requirements.")
         raise e
       
       self.dependenciesInstalled = True
@@ -129,8 +131,8 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       self.segmentationLogic = SegmentationLogic()
 
       # connect Segmentation signals
-      self.segmentationLogic.progressInfo.connect(print)
-      self.segmentationLogic.errorOccurred.connect(slicer.util.errorDisplay)
+      self.segmentationLogic.progressInfo.connect(self.log_method)
+      self.segmentationLogic.errorOccurred.connect(self.error_method)
       self.segmentationLogic.inferenceFinished.connect(self._inferenceFinished) 
       # TODO: reconfigure signal to connect to custom method; currently experiencing issues with loadSegmentation [fixed]
       
@@ -160,7 +162,7 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       if not modelPath.exists():
         # avoid tying loading with download
         # self.downloadWeights()
-        slicer.util.messageBox("Model directory does not exist.")
+        self.log_method("Model directory does not exist.")
         return
 
       if not self.modelParameters:
@@ -172,9 +174,9 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
 
       # testing purposes, check whether the directory is valid
       if self.hasValidParams:
-        slicer.util.messageBox("Model directory is valid.")
+        self.log_method("Model directory is valid.")
       else:
-        slicer.util.messageBox("Model directory is not valid.")
+        self.log_method("Model directory is not valid.")
 
       # attach updated model parameters to segmentation logic
       self._reloadParameters()
@@ -214,7 +216,7 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
         if progressBar:
           progressBar.setLabelText("Downloading model. This may take some time.")
         else:
-          slicer.util.messageBox("Downloading model. This may take some time.")
+          self.log_method("Downloading model. This may take some time.")
 
         weightPath.mkdir(parents = True)
 
@@ -247,10 +249,10 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
         with zipfile.ZipFile(zipPath, "r") as f:
             f.extractall(weightPath)
 
-        slicer.util.messageBox("Download complete.")
+        self.log_method("Download complete.")
         return True
       else:
-        slicer.util.messageBox("Already downloaded.")
+        self.log_method("Already downloaded.")
         return False
         
 
@@ -263,20 +265,20 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       """
       
       if not self.segmentResult or not self.segmentResult.IsA("vtkMRMLSegmentationNode"):
-        slicer.util.errorDisplay("No destination segmentation node set.")
+        self.error_method("No destination segmentation node set.")
         return
       
       result: vtkMRMLSegmentationNode = self.segmentationLogic.loadSegmentation()
       
       if not result:
-        slicer.util.errorDisplay("Inference finshed, but not segmentation was generated.")
+        self.error_method("Inference finished, but no segmentation was generated.")
       
       destination_segment = self.segmentResult.GetSegmentation()
       destination_segment.DeepCopy(result.GetSegmentation())
       
       # TODO: deal with the temporary loaded segmentation
       
-      slicer.util.messageBox("Inference complete.")
+      self.log_method("Inference complete.")
       
 
     def _reloadParameters(self) -> None:

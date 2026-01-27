@@ -314,7 +314,7 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             return
         
         if toggled:
-            slicer.vtkSlicerSegmentationsModuleLogic.CreateClosedSurfaceRepresentation(segmentationNode)
+            segmentationNode.CreateClosedSurfaceRepresentation()
         displayNode.SetVisibility3D(toggled)
 
     
@@ -371,7 +371,7 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             appLogic.PropagateVolumeSelection()
 
             volName = node.GetName() or "Volume"
-            self.ui.segmentSelector.baseName = f"{volName}_seg"
+            self.ui.segmentSelector.baseName = f"{volName}_segmentation"
         
         
     
