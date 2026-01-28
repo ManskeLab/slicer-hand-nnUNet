@@ -53,7 +53,7 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       self.dependenciesInstalled = False
       self.isSetup = False
 
-      
+
     def setup(self):
       """
       Setup logic including installing dependencies, loading model weight, and defining self.segmentationLogic
@@ -182,11 +182,13 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       self.modelParameters.modelPath = modelPath
       self.modelParameters.checkPointName = handCBCTLogic.MODEL_CHECKPOINT
 
-      # testing purposes, check whether the directory is valid
-      if self.hasValidParams:
-        self.logMethod("Model directory is valid.")
-      else:
-        self.logMethod("Model directory is not valid.")
+
+      # only display message if load button was clicked
+      if loadAgain:
+        if self.hasValidParams:
+          self.logMethod("Model directory is valid.")
+        else:
+          self.logMethod("Model directory is not valid.")
 
       # attach updated model parameters to segmentation logic
       self._reloadParameters()
