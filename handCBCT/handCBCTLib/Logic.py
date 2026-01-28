@@ -290,7 +290,7 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       destination_segment = self.segmentResult.GetSegmentation()
       destination_segment.DeepCopy(result.GetSegmentation())
       
-      # TODO: deal with the temporary loaded segmentation
+      slicer.mrmlScene.RemoveNode(result)
       
       self.logMethod("Inference complete.")
 
