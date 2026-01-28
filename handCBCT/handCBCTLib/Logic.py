@@ -52,12 +52,38 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       # flags for setup related tasks
       self.dependenciesInstalled = False
       self.isSetup = False
+
+      
+    def setup(self):
+      """
+      Setup logic including installing dependencies, loading model weight, and defining self.segmentationLogic
+      """
+      if not self.dependenciesInstalled:
+        self.installDependencies()
+
+      # SlicerNNUNetLib is installed
+      from SlicerNNUNetLib import SegmentationLogic
+
+      self.segmentationLogic = SegmentationLogic()
+
+      # connect Segmentation signals
+      self.segmentationLogic.progressInfo.connect(print) # do not connect this to UI elements
+      self.segmentationLogic.errorOccurred.connect(self.errorMethod)
+      self.segmentationLogic.inferenceFinished.connect(self._inferenceFinished) 
+      # TODO: reconfigure signal to connect to custom method; currently experiencing issues with loadSegmentation [fixed]
+      
+      # prepare nnunet Parameter
+      from SlicerNNUNetLib import Parameter
+      self.modelParameters = Parameter()
+
+      if not (self.getModelPath() / handCBCTLogic.MODEL_WEIGHT_NAME).exists():
+        self.downloadWeights()
+
+      self.loadWeights() # loadWeights will download weights if not already downloaded
+      self.isSetup = True
+
+
     
-    def getParameterNode(self):
-      """
-        Return a Parameter Node 
-      """
-      return handCBCTParameterNode(super().getParameterNode())
     
     def process(self, inputVolume: vtkMRMLScalarVolumeNode, foldCount: int, deviceType: str, outputSegment: vtkMRMLSegmentationNode):
       """
@@ -98,7 +124,9 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       
     def stopProcess(self):
       """
-      Stops the segmentation process
+      Stops the segmentation process.
+
+      Should be used via stop button if segmentation finishes yet process does not signal end.
       """
       self.segmentationLogic.stopSegmentation()
       
@@ -123,33 +151,8 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       
       self.dependenciesInstalled = True
 
-    def setup(self):
-      """
-      Setup logic including installing dependencies, loading model weight, and defining self.segmentationLogic
-      """
-      if not self.dependenciesInstalled:
-        self.installDependencies()
+    
 
-      # SlicerNNUNetLib is installed
-      from SlicerNNUNetLib import SegmentationLogic
-
-      self.segmentationLogic = SegmentationLogic()
-
-      # connect Segmentation signals
-      self.segmentationLogic.progressInfo.connect(print) # do not connect this to UI elements
-      self.segmentationLogic.errorOccurred.connect(self.errorMethod)
-      self.segmentationLogic.inferenceFinished.connect(self._inferenceFinished) 
-      # TODO: reconfigure signal to connect to custom method; currently experiencing issues with loadSegmentation [fixed]
-      
-      # prepare nnunet Parameter
-      from SlicerNNUNetLib import Parameter
-      self.modelParameters = Parameter()
-
-      if not (self.getModelPath() / handCBCTLogic.MODEL_WEIGHT_NAME).exists():
-        self.downloadWeights()
-
-      self.loadWeights() # loadWeights will download weights if not already downloaded
-      self.isSetup = True
 
     def loadWeights(self, loadAgain: bool = False):
       """
@@ -269,6 +272,8 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       Wraps segmentationLogic.inferenceFinished
       
       Load in returned segmentation from loadSegmentation to segmentResult
+
+      args/kwargs to catch additional parameters sent by signal caller
       """
       
       if not self.segmentResult or not self.segmentResult.IsA("vtkMRMLSegmentationNode"):
@@ -302,6 +307,12 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       if self.segmentationLogic and self.modelParameters:
         self.segmentationLogic.setParameter(self.modelParameters)
 
+
+    def getParameterNode(self):
+      """
+        Return a Parameter Node 
+      """
+      return handCBCTParameterNode(super().getParameterNode())
 
     @staticmethod
     def getModelPath() -> Path:
