@@ -28,22 +28,22 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
     MODEL_CHECKPOINT = "checkpoint_final.pth"
     MODEL_WEIGHT_NAME = "Dataset001_hand"
 
-    def __init__(self, log_method, error_method, finish_signal = None):
+    def __init__(self, logMethod, errorMethod, finishSignal = None):
       """
       Called when the logic class is instantiated. Can be used for initializing member variables.
       
-      :param log_method: provide a method for logging output
-      :param error_method: provide a method for providing error messages
+      :param logMethod: provide a method for logging output
+      :param errorMethod: provide a method for providing error messages
       """
       ScriptedLoadableModuleLogic.__init__(self)
       
       # attributes
-      self.finish_signal = finish_signal
-      self.log_method = log_method # TODO: change current messages which create UI elements (ie. MessageBox) to use log_method
-      self.error_method = error_method
+      self.finishSignal = finishSignal
+      self.logMethod = logMethod # TODO: change current messages which create UI elements (ie. MessageBox) to use logMethod
+      self.errorMethod = errorMethod
 
-      assert(callable(log_method))
-      assert(callable(error_method))
+      assert(callable(logMethod))
+      assert(callable(errorMethod))
 
       self.segmentationLogic = None
       self.modelParameters = None
@@ -51,7 +51,7 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
 
       # flags for setup related tasks
       self.dependenciesInstalled = False
-      self.is_setup = False
+      self.isSetup = False
     
     def getParameterNode(self):
       """
@@ -72,7 +72,7 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       See handCBCTParameterNode for more details
       """
       # check whether model has been configured
-      if not self.is_setup:
+      if not self.isSetup:
         self.setup()
     
       if not self.hasValidParams:
@@ -109,7 +109,7 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       try:
         import SlicerNNUNetLib
       except ModuleNotFoundError as err:
-        self.error_method("This module requires the SlicerNNUNet extension. Please install it in Extension Manager.")
+        self.errorMethod("This module requires the SlicerNNUNet extension. Please install it in Extension Manager.")
         raise err
 
       from SlicerNNUNetLib import InstallLogic
@@ -118,7 +118,7 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       try:
         install_logic.setupPythonRequirements()
       except Exception as e:
-        self.error_method("Error occurred while downloading requirements.")
+        self.errorMethod("Error occurred while downloading requirements.")
         raise e
       
       self.dependenciesInstalled = True
@@ -137,7 +137,7 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
 
       # connect Segmentation signals
       self.segmentationLogic.progressInfo.connect(print) # do not connect this to UI elements
-      self.segmentationLogic.errorOccurred.connect(self.error_method)
+      self.segmentationLogic.errorOccurred.connect(self.errorMethod)
       self.segmentationLogic.inferenceFinished.connect(self._inferenceFinished) 
       # TODO: reconfigure signal to connect to custom method; currently experiencing issues with loadSegmentation [fixed]
       
@@ -149,7 +149,7 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
         self.downloadWeights()
 
       self.loadWeights() # loadWeights will download weights if not already downloaded
-      self.is_setup = True
+      self.isSetup = True
 
     def loadWeights(self, loadAgain: bool = False):
       """
@@ -169,7 +169,7 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       if not modelPath.exists():
         # avoid tying loading with download
         # self.downloadWeights()
-        self.log_method("Model directory does not exist. Try downloading.")
+        self.logMethod("Model directory does not exist. Try downloading.")
         return
 
       if not self.modelParameters or loadAgain:
@@ -181,9 +181,9 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
 
       # testing purposes, check whether the directory is valid
       if self.hasValidParams:
-        self.log_method("Model directory is valid.")
+        self.logMethod("Model directory is valid.")
       else:
-        self.log_method("Model directory is not valid.")
+        self.logMethod("Model directory is not valid.")
 
       # attach updated model parameters to segmentation logic
       self._reloadParameters()
@@ -223,7 +223,7 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
         if progressBar:
           progressBar.setLabelText("Downloading model. This may take some time.")
         else:
-          self.log_method("Downloading model. This may take some time.")
+          self.logMethod("Downloading model. This may take some time.")
 
         weightPath.mkdir(parents = True)
 
@@ -256,10 +256,10 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
         with zipfile.ZipFile(zipPath, "r") as f:
             f.extractall(weightPath)
 
-        self.log_method("Download complete.")
+        self.logMethod("Download complete.")
         return True
       else:
-        self.log_method("Already downloaded.")
+        self.logMethod("Already downloaded.")
         return False
         
 
@@ -272,25 +272,25 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       """
       
       if not self.segmentResult or not self.segmentResult.IsA("vtkMRMLSegmentationNode"):
-        self.error_method("No destination segmentation node set.")
+        self.errorMethod("No destination segmentation node set.")
         return
       
       result: vtkMRMLSegmentationNode = self.segmentationLogic.loadSegmentation()
       
       if not result:
-        self.error_method("Inference finished, but no segmentation was generated.")
+        self.errorMethod("Inference finished, but no segmentation was generated.")
       
       destination_segment = self.segmentResult.GetSegmentation()
       destination_segment.DeepCopy(result.GetSegmentation())
       
       # TODO: deal with the temporary loaded segmentation
       
-      self.log_method("Inference complete.")
+      self.logMethod("Inference complete.")
 
 
       # call finish signal if defined
-      if self.finish_signal:
-        self.finish_signal()
+      if self.finishSignal:
+        self.finishSignal()
       
 
     def _reloadParameters(self) -> None:
