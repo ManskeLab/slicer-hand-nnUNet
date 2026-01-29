@@ -341,8 +341,17 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         """
 
         with slicer.util.tryWithErrorDisplay("Model loading failed.", waitCursor = True):
-            self.logic.loadWeights(True); # force reload
+            self.logic.loadWeights(True) # force reload
             self.ui.checkBox.setChecked(self.logic.hasValidParams)
+
+    def onPostButton(self):
+        """
+        Used for post-processing segmentations, remove all islands except largest.
+        """
+
+        with slicer.util.tryWithErrorDisplay("Segment post processing failed.", waitCursor = True):
+            self.logic.cleanSegmentation()
+
 
     def onVolumeNodeChanged(self, node):
         """

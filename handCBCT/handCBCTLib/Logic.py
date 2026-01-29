@@ -267,6 +267,36 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
         self.logMethod("Already downloaded.")
         return False
         
+    def cleanSegmentation(self, segmentationNode):
+      """
+      Takes in a segmentation node and processes by removing all but largest island for each segment
+
+      :param segmentationNode: the segmentation node to process
+      """
+
+      # use segment editor logic
+      logic = slicer.modules.segmenteditor.logic()
+      
+      
+      parameterNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLSegmentEditorNode")
+      parameterNode.SetAndObserveSegmentationNode(segmentationNode)
+      
+      
+      segmentation = segmentationNode.GetSegmentation()
+      segmentIDs = vtk.vtkStringArray() # TODO: import vtk
+      segmentation.GetSegmentIDs(segmentIDs)
+      
+      # loop through segments
+      for i in range(segmentIDs.GetNumberOfValues()):
+          segmentID = segmentIDs.GetValue(i)
+          parameterNode.SetSelectedSegmentID(segmentID)
+          
+          logic.setEffectParameter(parameterNode, "Islands", "Operation", "KEEP_LARGEST_ISLAND")
+          logic.applyEffect(parameterNode, "Islands")
+          
+      # remove the temporary parameter node
+      slicer.mrmlScene.RemoveNode(parameterNode)
+
 
 
     def _inferenceFinished(self, *args, **kwargs):
