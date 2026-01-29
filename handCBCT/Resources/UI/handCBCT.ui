@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>688</width>
-    <height>705</height>
+    <width>674</width>
+    <height>688</height>
    </rect>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -278,17 +278,42 @@
     </widget>
    </item>
    <item>
-    <widget class="qMRMLSegmentationShow3DButton" name="showButton">
-     <property name="enabled">
-      <bool>false</bool>
+    <widget class="ctkCollapsibleButton" name="CollapsibleButton_2">
+     <property name="text">
+      <string>Segmentation</string>
      </property>
-     <property name="checkable">
+     <property name="checked">
       <bool>true</bool>
      </property>
+     <property name="contentsFrameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <widget class="QPushButton" name="postButton">
+        <property name="enabled">\
+         <value>false</value>
+        </property>
+        <property name="text">
+         <string>Remove small islands</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="qMRMLSegmentationShow3DButton" name="showButton">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="qMRMLSegmentsTableView" name="segmentsTableView"/>
+      </item>
+     </layout>
     </widget>
-   </item>
-   <item>
-    <widget class="qMRMLSegmentsTableView" name="segmentsTableView"/>
    </item>
    <item>
     <layout class="QFormLayout" name="formLayout"/>
@@ -297,6 +322,9 @@
     <widget class="ctkCollapsibleButton" name="CollapsibleButton">
      <property name="text">
       <string>More</string>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
      </property>
      <property name="contentsFrameShape">
       <enum>QFrame::StyledPanel</enum>

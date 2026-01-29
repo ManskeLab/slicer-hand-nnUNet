@@ -6,8 +6,8 @@ project(slicer_hand_nnUNet)
 # Extension meta-information
 set(EXTENSION_HOMEPAGE "https://www.slicer.org/wiki/Documentation/Nightly/Extensions/slicer_hand_nnUNet")
 set(EXTENSION_CATEGORY "Examples")
-set(EXTENSION_CONTRIBUTORS "John Doe (AnyWare Corp.)")
-set(EXTENSION_DESCRIPTION "Test deployment of nnu-net model (hand segmentation of CBCT images)")
+set(EXTENSION_CONTRIBUTORS "Samuel Yu")
+set(EXTENSION_DESCRIPTION "Hand segmentation nnUNet models")
 set(EXTENSION_ICONURL "https://www.example.com/Slicer/Extensions/slicer_hand_nnUNet")
 set(EXTENSION_SCREENSHOTURLS "https://www.example.com/Slicer/Extensions/nnunet_test/Screenshots/1.png")
 set(EXTENSION_DEPENDS "NNUNet") # Specified as a list or "NA" if no dependencies

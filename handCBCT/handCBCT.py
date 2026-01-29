@@ -124,6 +124,7 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.ui.stopButton.connect('clicked(bool)', self.onStopButton)
         self.ui.downloadButton.connect('clicked(bool)', self.onDownloadButton)
         self.ui.loadButton.connect('clicked(bool)', self.onLoadButton)
+        self.ui.postButton.connect('clicked(bool)', self.onPostButton)
         self.ui.showButton.toggled.connect(self.onShowButton)
         
         
@@ -204,8 +205,12 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             # Note: in the .ui file, a Qt dynamic property called "SlicerParameterName" is set on each
             # ui element that needs connection.
             self._parameterNodeGuiTag = self._parameterNode.connectGui(self.ui)
+
+            # add observer callbacks
             self.addObserver(self._parameterNode, vtk.vtkCommand.ModifiedEvent, self._checkCanStart)
             self.addObserver(self._parameterNode, vtk.vtkCommand.ModifiedEvent, self._checkCanShow)
+
+            # initial call
             self._checkCanShow()
             self._checkCanStart()
     
@@ -379,7 +384,7 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         """
         Simple callback for inference finish to re-enable selectors
         """
-
+        self.ui.postButton.enabled = True
         self._toggleSelectors(True)
 
 #
