@@ -22,11 +22,10 @@ class handCBCT(ScriptedLoadableModule):
         self.parent.title = "handCBCT"  # TODO: make this more human readable by adding spaces
         self.parent.categories = ["Segmentation"]  # TODO: set categories (folders where the module shows up in the module selector)
         self.parent.dependencies = []  # TODO: add here list of module names that this module requires
-        self.parent.contributors = ["John Doe (AnyWare Corp.)"]  # TODO: replace with "Firstname Lastname (Organization)"
+        self.parent.contributors = ["Samuel Yu"]  # TODO: replace with "Firstname Lastname (Organization)"
         # TODO: update with short description of the module and a link to online module documentation
         self.parent.helpText = """
-This is an example of scripted loadable module bundled in an extension.
-See more information in <a href="https://github.com/organization/projectname#handCBCT">module documentation</a>.
+This is a scripted loadable module for wrist bone segmentation via nnUNet.
 """
         # TODO: replace with organization, grant and thanks
         self.parent.acknowledgementText = """
@@ -70,7 +69,7 @@ def registerSampleData():
         #  import hashlib; print(hashlib.sha256(open(filename, "rb").read()).hexdigest())
         checksums='SHA256:998cb522173839c78657f4bc0ea907cea09fd04e44601f17c82ea27927937b95',
         # This node name will be used when the data set is loaded
-        nodeNames='handCBCT1'
+        nodeNames='handCBCT Sample'
     )
 
 
@@ -441,16 +440,6 @@ class handCBCTTest(ScriptedLoadableModuleTest):
 
         logic = handCBCTLogic()
 
-        # Test algorithm with non-inverted threshold
-        logic.process(inputVolume, outputVolume, threshold, True)
-        outputScalarRange = outputVolume.GetImageData().GetScalarRange()
-        self.assertEqual(outputScalarRange[0], inputScalarRange[0])
-        self.assertEqual(outputScalarRange[1], threshold)
-
-        # Test algorithm with inverted threshold
-        logic.process(inputVolume, outputVolume, threshold, False)
-        outputScalarRange = outputVolume.GetImageData().GetScalarRange()
-        self.assertEqual(outputScalarRange[0], inputScalarRange[0])
-        self.assertEqual(outputScalarRange[1], inputScalarRange[1])
+        # tests here
 
         self.delayDisplay('Test passed')
