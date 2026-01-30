@@ -350,7 +350,7 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         """
 
         with slicer.util.tryWithErrorDisplay("Segment post processing failed.", waitCursor = True):
-            self.logic.cleanSegmentation()
+            self.logic.cleanSegmentation(self._parameterNode.outputSegment)
 
 
     def onVolumeNodeChanged(self, node):

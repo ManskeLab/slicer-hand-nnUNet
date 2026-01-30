@@ -1,6 +1,7 @@
 import logging
 from pathlib import Path
 
+import vtk
 import slicer
 import slicer.util
 from slicer.ScriptedLoadableModule import ScriptedLoadableModuleLogic
@@ -275,8 +276,10 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       """
 
       # use segment editor logic
-      logic = slicer.modules.segmenteditor.logic()
-      
+      segmentLogic = slicer.modules.segmenteditor.logic()
+
+      # make sure we have a binary label map
+      segmentationNode.CreateBinaryLabelmapRepresentation()
       
       parameterNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLSegmentEditorNode")
       parameterNode.SetAndObserveSegmentationNode(segmentationNode)
@@ -286,16 +289,19 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       segmentIDs = vtk.vtkStringArray() # TODO: import vtk
       segmentation.GetSegmentIDs(segmentIDs)
       
-      # loop through segments
-      for i in range(segmentIDs.GetNumberOfValues()):
-          segmentID = segmentIDs.GetValue(i)
-          parameterNode.SetSelectedSegmentID(segmentID)
-          
-          logic.setEffectParameter(parameterNode, "Islands", "Operation", "KEEP_LARGEST_ISLAND")
-          logic.applyEffect(parameterNode, "Islands")
-          
-      # remove the temporary parameter node
-      slicer.mrmlScene.RemoveNode(parameterNode)
+      try:
+        # loop through segments
+        for i in range(segmentIDs.GetNumberOfValues()):
+            segmentID = segmentIDs.GetValue(i)
+            parameterNode.SetSelectedSegmentID(segmentID)
+            
+            segmentLogic.setEffectParameter(parameterNode, "Islands", "Operation", "KEEP_LARGEST_ISLAND")
+            segmentLogic.applyEffect(parameterNode, "Islands")
+      except Exception as e:
+        self.errorMethod(f"Error occurred when post processing: {e}")
+      finally:
+        # remove the temporary parameter node
+        slicer.mrmlScene.RemoveNode(parameterNode)
 
 
 
