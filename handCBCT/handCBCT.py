@@ -221,10 +221,11 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         if self._parameterNode and self._parameterNode.outputSegment:
             # self.ui.showButton.setCheckable(True)
             self.ui.showButton.enabled = True
+            self.ui.postButton.enabled = True
         else:
             # self.ui.showButton.setCheckable(False)
             self.ui.showButton.enabled = False
-        
+            self.ui.postButton.enabled = False      
         
     def _checkCanStart(self, caller = None, event = None) -> None:
         """
