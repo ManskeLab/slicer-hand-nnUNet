@@ -292,7 +292,7 @@
       <item>
        <widget class="QPushButton" name="postButton">
         <property name="enabled">\
-         <value>false</value>
+         <bool>false</bool>
         </property>
         <property name="text">
          <string>Remove small islands</string>
