@@ -1,7 +1,6 @@
 import logging
 from pathlib import Path
 
-import vtk
 import slicer
 import slicer.util
 from slicer.ScriptedLoadableModule import ScriptedLoadableModuleLogic
@@ -275,33 +274,49 @@ class handCBCTLogic(ScriptedLoadableModuleLogic):
       :param segmentationNode: the segmentation node to process
       """
 
-      # use segment editor logic
-      segmentLogic = slicer.modules.segmenteditor.logic()
-
       # make sure we have a binary label map
       segmentationNode.CreateBinaryLabelmapRepresentation()
-      
-      parameterNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLSegmentEditorNode")
-      parameterNode.SetAndObserveSegmentationNode(segmentationNode)
-      
-      
-      segmentation = segmentationNode.GetSegmentation()
-      segmentIDs = vtk.vtkStringArray() # TODO: import vtk
-      segmentation.GetSegmentIDs(segmentIDs)
+
+      # create editor node
+      editorNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLSegmentEditorNode")
+      editorNode.SetAndObserveSegmentationNode(segmentationNode)
       
       try:
-        # loop through segments
-        for i in range(segmentIDs.GetNumberOfValues()):
-            segmentID = segmentIDs.GetValue(i)
-            parameterNode.SetSelectedSegmentID(segmentID)
-            
-            segmentLogic.setEffectParameter(parameterNode, "Islands", "Operation", "KEEP_LARGEST_ISLAND")
-            segmentLogic.applyEffect(parameterNode, "Islands")
+        # create segmentation widget
+        
+        editorWidget = slicer.qMRMLSegmentEditorWidget()
+        editorWidget.setMRMLScene(slicer.mrmlScene)
+
+        # connect widget
+        editorWidget.setMRMLSegmentEditorNode(editorNode) # node for segment editor module
+        editorWidget.setSegmentationNode(segmentationNode) # node passed to method to perform processing on
+
+        # get segments
+        segmentation = segmentationNode.GetSegmentation()
+        segmentIDs = [segmentation.GetNthSegmentID(i) for i in range(segmentation.GetNumberOfSegments())]
+
+        # set effect to keep largest island
+        editorWidget.setActiveEffectByName("Islands")
+        effect = editorWidget.activeEffect()
+        effect.setParameter("Operation", "KEEP_LARGEST_ISLAND")
+
+
+        for segmentID in segmentIDs:
+          editorNode.SetSelectedSegmentID(segmentID)
+          
+          effect.self().onApply()   # apply the keep largest island effect
+
       except Exception as e:
         self.errorMethod(f"Error occurred when post processing: {e}")
+
       finally:
-        # remove the temporary parameter node
-        slicer.mrmlScene.RemoveNode(parameterNode)
+
+        if editorWidget is not None:
+            editorWidget.deleteLater()
+
+        # remove the temporary node
+        slicer.mrmlScene.RemoveNode(editorNode)
+
 
 
 
