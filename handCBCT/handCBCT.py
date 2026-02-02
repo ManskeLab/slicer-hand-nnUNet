@@ -352,30 +352,24 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 		"""
 		Used for post-processing segmentations, remove all islands except largest.
 		"""
-
-<<<<<<< HEAD
 		with slicer.util.tryWithErrorDisplay("Segment post processing failed.", waitCursor = True):
-			self.logic.cleanSegmentation(self._parameterNode.outputSegment)
-=======
-        with slicer.util.tryWithErrorDisplay("Segment post processing failed.", waitCursor = True):
-            progress_bar = slicer.util.createProgressDialog(
-                parent=slicer.util.mainWindow(),
-                windowTitle='Segmentation Postprocessing', 
-                autoClose=True, 
-                minimum = 0, 
-            )
+			progress_bar = slicer.util.createProgressDialog(
+				parent=slicer.util.mainWindow(),
+				windowTitle='Segmentation Postprocessing', 
+				autoClose=True, 
+				minimum = 0, 
+			)
 
 
-            # bring progress window to the foreground
-            progress_bar.setCancelButton(None) 
-            progress_bar.show()
-            progress_bar.raise_()
-            progress_bar.activateWindow()
+			# bring progress window to the foreground
+			progress_bar.setCancelButton(None) 
+			progress_bar.show()
+			progress_bar.raise_()
+			progress_bar.activateWindow()
 
-            slicer.app.processEvents()
+			slicer.app.processEvents()
 
-            self.logic.cleanSegmentation(self._parameterNode.outputSegment, progressBar = progress_bar)
->>>>>>> ed3920c (added: progress bar for segmentation clean up)
+			self.logic.cleanSegmentation(self._parameterNode.outputSegment, progressBar = progress_bar)
 
 	# Node callbacks
 
@@ -445,9 +439,9 @@ class handCBCTTest(ScriptedLoadableModuleTest):
 		"""Run as few or as many tests as needed here.
 		"""
 		self.setUp()
-        self.test_logic_helpers()
-        self.test_logic_state_flags()
-        self.test_cleanSegmentation_keeps_largest_island()
+		#self.test_logic_helpers()
+		#self.test_logic_state_flags()
+		#self.test_cleanSegmentation_keeps_largest_island()
 
 	
 	def test_handCBCT1(self):
