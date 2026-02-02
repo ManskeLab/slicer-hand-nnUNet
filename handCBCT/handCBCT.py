@@ -15,28 +15,28 @@ from handCBCTLib import handCBCTLogic
 #
 
 class handCBCT(ScriptedLoadableModule):
-    """Uses ScriptedLoadableModule base class, available at:
-    https://github.com/Slicer/Slicer/blob/master/Base/Python/slicer/ScriptedLoadableModule.py
-    """
+	"""Uses ScriptedLoadableModule base class, available at:
+	https://github.com/Slicer/Slicer/blob/master/Base/Python/slicer/ScriptedLoadableModule.py
+	"""
 
-    def __init__(self, parent):
-        ScriptedLoadableModule.__init__(self, parent)
-        self.parent.title = "handCBCT"  # TODO: make this more human readable by adding spaces
-        self.parent.categories = [translate("qSlicerAbstractCoreModule", "Segmentation")]  # TODO: set categories (folders where the module shows up in the module selector)
-        self.parent.dependencies = []  # TODO: add here list of module names that this module requires
-        self.parent.contributors = ["Samuel Yu"]  # TODO: replace with "Firstname Lastname (Organization)"
-        # TODO: update with short description of the module and a link to online module documentation
-        self.parent.helpText = """
+	def __init__(self, parent):
+		ScriptedLoadableModule.__init__(self, parent)
+		self.parent.title = "handCBCT"  # TODO: make this more human readable by adding spaces
+		self.parent.categories = [translate("qSlicerAbstractCoreModule", "Segmentation")]  # TODO: set categories (folders where the module shows up in the module selector)
+		self.parent.dependencies = []  # TODO: add here list of module names that this module requires
+		self.parent.contributors = ["Samuel Yu"]  # TODO: replace with "Firstname Lastname (Organization)"
+		# TODO: update with short description of the module and a link to online module documentation
+		self.parent.helpText = """
 This is a scripted loadable module for wrist bone segmentation via nnUNet.
 """
-        # TODO: replace with organization, grant and thanks
-        self.parent.acknowledgementText = """
+		# TODO: replace with organization, grant and thanks
+		self.parent.acknowledgementText = """
 This file was originally developed by Jean-Christophe Fillion-Robin, Kitware Inc., Andras Lasso, PerkLab,
 and Steve Pieper, Isomics, Inc. and was partially funded by NIH grant 3P41RR013218-12S1.
 """
 
-        # Additional initialization step after application startup is complete
-        slicer.app.connect("startupCompleted()", registerSampleData)
+		# Additional initialization step after application startup is complete
+		slicer.app.connect("startupCompleted()", registerSampleData)
 
 
 #
@@ -44,35 +44,35 @@ and Steve Pieper, Isomics, Inc. and was partially funded by NIH grant 3P41RR0132
 #
 
 def registerSampleData():
-    """
-    Add data sets to Sample Data module.
-    """
-    # It is always recommended to provide sample data for users to make it easy to try the module,
-    # but if no sample data is available then this method (and associated startupCompeted signal connection) can be removed.
+	"""
+	Add data sets to Sample Data module.
+	"""
+	# It is always recommended to provide sample data for users to make it easy to try the module,
+	# but if no sample data is available then this method (and associated startupCompeted signal connection) can be removed.
 
-    import SampleData
-    iconsPath = os.path.join(os.path.dirname(__file__), 'Resources/Icons')
+	import SampleData
+	iconsPath = os.path.join(os.path.dirname(__file__), 'Resources/Icons')
 
-    # To ensure that the source code repository remains small (can be downloaded and installed quickly)
-    # it is recommended to store data sets that are larger than a few MB in a Github release.
+	# To ensure that the source code repository remains small (can be downloaded and installed quickly)
+	# it is recommended to store data sets that are larger than a few MB in a Github release.
 
-    # handCBCT1
-    SampleData.SampleDataLogic.registerCustomSampleDataSource(
-        # Category and sample name displayed in Sample Data module
-        category='handCBCT',
-        sampleName='handCBCT Sample',
-        # Thumbnail should have size of approximately 260x280 pixels and stored in Resources/Icons folder.
-        # It can be created by Screen Capture module, "Capture all views" option enabled, "Number of images" set to "Single".
-        thumbnailFileName=os.path.join(iconsPath, 'handcbct_icon.png'),
-        # Download URL and target file name
-        uris="https://github.com/ManskeLab/slicer-hand-nnUNet/releases/download/v0.3.0/handCBCTSample.nii.gz",
-        fileNames='handCBCTSample.nii.gz',
-        # Checksum to ensure file integrity. Can be computed by this command:
-        #  import hashlib; print(hashlib.sha256(open(filename, "rb").read()).hexdigest())
-        checksums='SHA256:404997305e1a0f2d4e31c224dd0d3ad46af0ac85cf9393930470f61bb044659b',
-        # This node name will be used when the data set is loaded
-        nodeNames='handCBCT Sample'
-    )
+	# handCBCT1
+	SampleData.SampleDataLogic.registerCustomSampleDataSource(
+		# Category and sample name displayed in Sample Data module
+		category='handCBCT',
+		sampleName='handCBCT Sample',
+		# Thumbnail should have size of approximately 260x280 pixels and stored in Resources/Icons folder.
+		# It can be created by Screen Capture module, "Capture all views" option enabled, "Number of images" set to "Single".
+		thumbnailFileName=os.path.join(iconsPath, 'handcbct_icon.png'),
+		# Download URL and target file name
+		uris="https://github.com/ManskeLab/slicer-hand-nnUNet/releases/download/v0.3.0/handCBCTSample.nii.gz",
+		fileNames='handCBCTSample.nii.gz',
+		# Checksum to ensure file integrity. Can be computed by this command:
+		#  import hashlib; print(hashlib.sha256(open(filename, "rb").read()).hexdigest())
+		checksums='SHA256:404997305e1a0f2d4e31c224dd0d3ad46af0ac85cf9393930470f61bb044659b',
+		# This node name will be used when the data set is loaded
+		nodeNames='handCBCT Sample'
+	)
 
 
 #
@@ -80,325 +80,325 @@ def registerSampleData():
 #
 
 class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
-    """Uses ScriptedLoadableModuleWidget base class, available at:
-    https://github.com/Slicer/Slicer/blob/master/Base/Python/slicer/ScriptedLoadableModule.py
-    """
+	"""Uses ScriptedLoadableModuleWidget base class, available at:
+	https://github.com/Slicer/Slicer/blob/master/Base/Python/slicer/ScriptedLoadableModule.py
+	"""
 
-    def __init__(self, parent=None):
-        """
-        Called when the user opens the module the first time and the widget is initialized.
-        """
-        ScriptedLoadableModuleWidget.__init__(self, parent)
-        VTKObservationMixin.__init__(self)  # needed for parameter node observation
-        self.logic = None
-        self._parameterNode = None
-        self._parameterNodeGuiTag = False
+	def __init__(self, parent=None):
+		"""
+		Called when the user opens the module the first time and the widget is initialized.
+		"""
+		ScriptedLoadableModuleWidget.__init__(self, parent)
+		VTKObservationMixin.__init__(self)  # needed for parameter node observation
+		self.logic = None
+		self._parameterNode = None
+		self._parameterNodeGuiTag = False
 
-    def setup(self):
-        """
-        Called when the user opens the module the first time and the widget is initialized.
-        """
-        ScriptedLoadableModuleWidget.setup(self)
+	def setup(self):
+		"""
+		Called when the user opens the module the first time and the widget is initialized.
+		"""
+		ScriptedLoadableModuleWidget.setup(self)
 
-        # Load widget from .ui file (created by Qt Designer).
-        # Additional widgets can be instantiated manually and added to self.layout.
-        uiWidget = slicer.util.loadUI(self.resourcePath('UI/handCBCT.ui'))
-        self.layout.addWidget(uiWidget)
-        self.ui = slicer.util.childWidgetVariables(uiWidget)
+		# Load widget from .ui file (created by Qt Designer).
+		# Additional widgets can be instantiated manually and added to self.layout.
+		uiWidget = slicer.util.loadUI(self.resourcePath('UI/handCBCT.ui'))
+		self.layout.addWidget(uiWidget)
+		self.ui = slicer.util.childWidgetVariables(uiWidget)
 
-        # Set scene in MRML widgets. Make sure that in Qt designer the top-level qMRMLWidget's
-        # "mrmlSceneChanged(vtkMRMLScene*)" signal in is connected to each MRML widget's.
-        # "setMRMLScene(vtkMRMLScene*)" slot.
-        uiWidget.setMRMLScene(slicer.mrmlScene)
+		# Set scene in MRML widgets. Make sure that in Qt designer the top-level qMRMLWidget's
+		# "mrmlSceneChanged(vtkMRMLScene*)" signal in is connected to each MRML widget's.
+		# "setMRMLScene(vtkMRMLScene*)" slot.
+		uiWidget.setMRMLScene(slicer.mrmlScene)
 
-        # Create logic class. Logic implements all computations that should be possible to run
-        # in batch mode, without a graphical user interface.
-        self.logic = handCBCTLogic(slicer.util.messageBox, slicer.util.errorDisplay, self.onInferenceFinished) 
+		# Create logic class. Logic implements all computations that should be possible to run
+		# in batch mode, without a graphical user interface.
+		self.logic = handCBCTLogic(slicer.util.messageBox, slicer.util.errorDisplay, self.onInferenceFinished) 
 
-        # Connections
+		# Connections
 
-        # These connections ensure that we update parameter node when scene is closed
-        self.addObserver(slicer.mrmlScene, slicer.mrmlScene.StartCloseEvent, self.onSceneStartClose)
-        self.addObserver(slicer.mrmlScene, slicer.mrmlScene.EndCloseEvent, self.onSceneEndClose)
+		# These connections ensure that we update parameter node when scene is closed
+		self.addObserver(slicer.mrmlScene, slicer.mrmlScene.StartCloseEvent, self.onSceneStartClose)
+		self.addObserver(slicer.mrmlScene, slicer.mrmlScene.EndCloseEvent, self.onSceneEndClose)
 
-        # Buttons
-        self.ui.startButton.connect('clicked(bool)', self.onStartButton)
-        self.ui.stopButton.connect('clicked(bool)', self.onStopButton)
-        self.ui.downloadButton.connect('clicked(bool)', self.onDownloadButton)
-        self.ui.loadButton.connect('clicked(bool)', self.onLoadButton)
-        self.ui.postButton.connect('clicked(bool)', self.onPostButton)
-        self.ui.showButton.toggled.connect(self.onShowButton)
-        
-        
-        # Selectors
-        self.ui.volumeSelector.connect('currentNodeChanged(vtkMRMLNode*)', self.onVolumeNodeChanged)
-        self.ui.segmentSelector.connect('currentNodeChanged(vtkMRMLNode*)', self.onSegmentNodeChanged)
-        
-        
-        # Make sure parameter node is initialized (needed for module reload)
-        self.initializeParameterNode()
+		# Buttons
+		self.ui.startButton.connect('clicked(bool)', self.onStartButton)
+		self.ui.stopButton.connect('clicked(bool)', self.onStopButton)
+		self.ui.downloadButton.connect('clicked(bool)', self.onDownloadButton)
+		self.ui.loadButton.connect('clicked(bool)', self.onLoadButton)
+		self.ui.postButton.connect('clicked(bool)', self.onPostButton)
+		self.ui.showButton.toggled.connect(self.onShowButton)
+		
+		
+		# Selectors
+		self.ui.volumeSelector.connect('currentNodeChanged(vtkMRMLNode*)', self.onVolumeNodeChanged)
+		self.ui.segmentSelector.connect('currentNodeChanged(vtkMRMLNode*)', self.onSegmentNodeChanged)
+		
+		
+		# Make sure parameter node is initialized (needed for module reload)
+		self.initializeParameterNode()
 
-    def cleanup(self):
-        """
-        Called when the application closes and the module widget is destroyed.
-        """
-        self.removeObservers()
+	def cleanup(self):
+		"""
+		Called when the application closes and the module widget is destroyed.
+		"""
+		self.removeObservers()
 
-    def enter(self):
-        """
-        Called each time the user opens this module.
-        """
-        # Make sure parameter node exists and observed
-        self.initializeParameterNode()
+	def enter(self):
+		"""
+		Called each time the user opens this module.
+		"""
+		# Make sure parameter node exists and observed
+		self.initializeParameterNode()
 
-    def exit(self):
-        """
-        Called each time the user opens a different module.
-        """
-        # Do not react to parameter node changes (GUI wlil be updated when the user enters into the module)
-        if self._parameterNode:
-            self._parameterNode.disconnectGui(self._parameterNodeGuiTag)
-            self._parameterNodeGuiTag = None
-            self.removeObserver(self._parameterNode, vtk.vtkCommand.ModifiedEvent, self._checkCanStart)
-            self.removeObserver(self._parameterNode, vtk.vtkCommand.ModifiedEvent, self._checkCanShow)
+	def exit(self):
+		"""
+		Called each time the user opens a different module.
+		"""
+		# Do not react to parameter node changes (GUI wlil be updated when the user enters into the module)
+		if self._parameterNode:
+			self._parameterNode.disconnectGui(self._parameterNodeGuiTag)
+			self._parameterNodeGuiTag = None
+			self.removeObserver(self._parameterNode, vtk.vtkCommand.ModifiedEvent, self._checkCanStart)
+			self.removeObserver(self._parameterNode, vtk.vtkCommand.ModifiedEvent, self._checkCanShow)
 
-    def onSceneStartClose(self, caller, event):
-        """
-        Called just before the scene is closed.
-        """
-        # Parameter node will be reset, do not use it anymore
-        self.setParameterNode(None)
+	def onSceneStartClose(self, caller, event):
+		"""
+		Called just before the scene is closed.
+		"""
+		# Parameter node will be reset, do not use it anymore
+		self.setParameterNode(None)
 
-    def onSceneEndClose(self, caller, event):
-        """
-        Called just after the scene is closed.
-        """
-        # If this module is shown while the scene is closed then recreate a new parameter node immediately
-        if self.parent.isEntered:
-            self.initializeParameterNode()
+	def onSceneEndClose(self, caller, event):
+		"""
+		Called just after the scene is closed.
+		"""
+		# If this module is shown while the scene is closed then recreate a new parameter node immediately
+		if self.parent.isEntered:
+			self.initializeParameterNode()
 
-    def initializeParameterNode(self):
-        """
-        Ensure parameter node exists and observed.
-        """
-        # Parameter node stores all user choices in parameter values, node selections, etc.
-        # so that when the scene is saved and reloaded, these settings are restored.
+	def initializeParameterNode(self):
+		"""
+		Ensure parameter node exists and observed.
+		"""
+		# Parameter node stores all user choices in parameter values, node selections, etc.
+		# so that when the scene is saved and reloaded, these settings are restored.
 
-        self.setParameterNode(self.logic.getParameterNode())
+		self.setParameterNode(self.logic.getParameterNode())
 
-        # Select default input nodes if nothing is selected yet to save a few clicks for the user
-        if not self._parameterNode.inputVolume:
-            firstVolumeNode = slicer.mrmlScene.GetFirstNodeByClass("vtkMRMLScalarVolumeNode")
-            if firstVolumeNode:
-                self._parameterNode.inputVolume = firstVolumeNode
+		# Select default input nodes if nothing is selected yet to save a few clicks for the user
+		if not self._parameterNode.inputVolume:
+			firstVolumeNode = slicer.mrmlScene.GetFirstNodeByClass("vtkMRMLScalarVolumeNode")
+			if firstVolumeNode:
+				self._parameterNode.inputVolume = firstVolumeNode
 
-    def setParameterNode(self, inputParameterNode):
-        """
-        Set and observe parameter node.
-        Observation is needed because when the parameter node is changed then the GUI must be updated immediately.
-        """
+	def setParameterNode(self, inputParameterNode):
+		"""
+		Set and observe parameter node.
+		Observation is needed because when the parameter node is changed then the GUI must be updated immediately.
+		"""
 
-        if self._parameterNode:
-            self._parameterNode.disconnectGui(self._parameterNodeGuiTag)
-            self.removeObserver(self._parameterNode, vtk.vtkCommand.ModifiedEvent, self._checkCanStart)
-        self._parameterNode = inputParameterNode
+		if self._parameterNode:
+			self._parameterNode.disconnectGui(self._parameterNodeGuiTag)
+			self.removeObserver(self._parameterNode, vtk.vtkCommand.ModifiedEvent, self._checkCanStart)
+		self._parameterNode = inputParameterNode
 
-        if self._parameterNode:
-            # Note: in the .ui file, a Qt dynamic property called "SlicerParameterName" is set on each
-            # ui element that needs connection.
-            self._parameterNodeGuiTag = self._parameterNode.connectGui(self.ui)
+		if self._parameterNode:
+			# Note: in the .ui file, a Qt dynamic property called "SlicerParameterName" is set on each
+			# ui element that needs connection.
+			self._parameterNodeGuiTag = self._parameterNode.connectGui(self.ui)
 
-            # add observer callbacks
-            self.addObserver(self._parameterNode, vtk.vtkCommand.ModifiedEvent, self._checkCanStart)
-            self.addObserver(self._parameterNode, vtk.vtkCommand.ModifiedEvent, self._checkCanShow)
+			# add observer callbacks
+			self.addObserver(self._parameterNode, vtk.vtkCommand.ModifiedEvent, self._checkCanStart)
+			self.addObserver(self._parameterNode, vtk.vtkCommand.ModifiedEvent, self._checkCanShow)
 
-            # initial call
-            self._checkCanShow()
-            self._checkCanStart()
+			# initial call
+			self._checkCanShow()
+			self._checkCanStart()
 
-    # internal methods
-    
-    def _checkCanShow(self, caller = None, event = None) -> None:
-        """
-        Callback to check whether to enable show segmentation menu
-        """        
-        if self._parameterNode and self._parameterNode.outputSegment:
-            # self.ui.showButton.setCheckable(True)
-            self.ui.showButton.enabled = True
-            self.ui.postButton.enabled = True
-        else:
-            # self.ui.showButton.setCheckable(False)
-            self.ui.showButton.enabled = False
-            self.ui.postButton.enabled = False      
-        
-    def _checkCanStart(self, caller = None, event = None) -> None:
-        """
-        Callback to check whether to enable start button (are the relevant parameters set?)
-        """
-        if self._parameterNode and self._parameterNode.inputVolume and self._parameterNode.outputSegment:
-            self.ui.startButton.toolTip = "Compute output segment"
-            self.ui.startButton.enabled = True
-        else:
-            self.ui.startButton.toolTip = "Select input and output nodes"
-            self.ui.startButton.enabled = False
+	# internal methods
+	
+	def _checkCanShow(self, caller = None, event = None) -> None:
+		"""
+		Callback to check whether to enable show segmentation menu
+		"""        
+		if self._parameterNode and self._parameterNode.outputSegment:
+			# self.ui.showButton.setCheckable(True)
+			self.ui.showButton.enabled = True
+			self.ui.postButton.enabled = True
+		else:
+			# self.ui.showButton.setCheckable(False)
+			self.ui.showButton.enabled = False
+			self.ui.postButton.enabled = False      
+		
+	def _checkCanStart(self, caller = None, event = None) -> None:
+		"""
+		Callback to check whether to enable start button (are the relevant parameters set?)
+		"""
+		if self._parameterNode and self._parameterNode.inputVolume and self._parameterNode.outputSegment:
+			self.ui.startButton.toolTip = "Compute output segment"
+			self.ui.startButton.enabled = True
+		else:
+			self.ui.startButton.toolTip = "Select input and output nodes"
+			self.ui.startButton.enabled = False
 
-    def _toggleSelectors(self, enable = True):
-        """
-        Helper method to toggle selectors on and off 
+	def _toggleSelectors(self, enable = True):
+		"""
+		Helper method to toggle selectors on and off 
 
-        Key use is to prevent changing of parameters when process is running
-        
-        :param enable: Enable selectors
-        """
-        self.ui.volumeSelector.enabled = enable
-        self.ui.segmentSelector.enabled = enable
-        self.ui.foldSelector.enabled = enable
-        self.ui.deviceSelector.enabled = enable
+		Key use is to prevent changing of parameters when process is running
+		
+		:param enable: Enable selectors
+		"""
+		self.ui.volumeSelector.enabled = enable
+		self.ui.segmentSelector.enabled = enable
+		self.ui.foldSelector.enabled = enable
+		self.ui.deviceSelector.enabled = enable
 
-        return
-
-
-    # Button callbacks
-
-    def onStartButton(self):
-        """
-        Run processing when user clicks "Start" button.
-        """
-        with slicer.util.tryWithErrorDisplay("Failed to compute results.", waitCursor=True):
-            # UI update (mostly for testing) to check whether provided model is valid.
-            self.ui.checkBox.setChecked(self.logic.hasValidParams)
-
-            self.ui.startButton.enabled = False
-            self.ui.stopButton.enabled = True
-            self._toggleSelectors(False)
-
-            # Compute output
-            self.logic.process(self._parameterNode.inputVolume, self._parameterNode.foldCount, self._parameterNode.deviceType, self._parameterNode.outputSegment)
-
-    def onStopButton(self):
-        """
-        Stop operation when user clicks "Stop" button
-        """
-        with slicer.util.tryWithErrorDisplay("Stop process failed.", waitCursor = True):
-            self.logic.stopProcess()
-            slicer.util.messageBox("Stopping process.")
-            
-            self.ui.stopButton.enabled = False
-            self.ui.startButton.enabled = True
-
-            self._toggleSelectors(True)
-        
-    def onShowButton(self, toggled = True):
-        """
-        Show 3D segmentation button click logic
-        
-        :param toggled: to toggle display on or off
-        """
-        # print(toggled)
-        
-        segmentationNode = self.ui.segmentSelector.currentNode()
-        if not segmentationNode:
-            slicer.util.messageBox("No segment selected.")
-            return
-        
-        segmentationNode.CreateDefaultDisplayNodes()
-        displayNode = segmentationNode.GetDisplayNode()
-        
-        if not displayNode:
-            slicer.util.messageBox("Something went wrong when obtaining segmentation display nodes.")
-            return
-        
-        if toggled:
-            segmentationNode.CreateClosedSurfaceRepresentation()
-        displayNode.SetVisibility3D(toggled)
-    
-    def onDownloadButton(self):
-        """
-        Run download logic when user clicks "Download Model" button
-        """
-        
-        with slicer.util.tryWithErrorDisplay("Model download failed, try again later.", waitCursor = True):
-            progress_bar = slicer.util.createProgressDialog(
-                parent=slicer.util.mainWindow(),
-                windowTitle='Model Download', 
-                autoClose=True, 
-                minimum = 0, 
-            )
+		return
 
 
-            # bring progress window to the foreground
-            progress_bar.setCancelButton(None) 
-            progress_bar.show()
-            progress_bar.raise_()
-            progress_bar.activateWindow()
+	# Button callbacks
 
-            slicer.app.processEvents()
+	def onStartButton(self):
+		"""
+		Run processing when user clicks "Start" button.
+		"""
+		with slicer.util.tryWithErrorDisplay("Failed to compute results.", waitCursor=True):
+			# UI update (mostly for testing) to check whether provided model is valid.
+			self.ui.checkBox.setChecked(self.logic.hasValidParams)
 
-            # run download process
-            self.logic.downloadWeights(downloadAgain = True, progressBar = progress_bar)
-        
-    def onLoadButton(self):
-        """
-        Run weight loading logic when user clicks "Load Model" button
-        
-        Mainly for testing purposes
-        """
+			self.ui.startButton.enabled = False
+			self.ui.stopButton.enabled = True
+			self._toggleSelectors(False)
 
-        with slicer.util.tryWithErrorDisplay("Model loading failed.", waitCursor = True):
-            self.logic.loadWeights(True) # force reload
-            self.ui.checkBox.setChecked(self.logic.hasValidParams)
+			# Compute output
+			self.logic.process(self._parameterNode.inputVolume, self._parameterNode.foldCount, self._parameterNode.deviceType, self._parameterNode.outputSegment)
 
-    def onPostButton(self):
-        """
-        Used for post-processing segmentations, remove all islands except largest.
-        """
+	def onStopButton(self):
+		"""
+		Stop operation when user clicks "Stop" button
+		"""
+		with slicer.util.tryWithErrorDisplay("Stop process failed.", waitCursor = True):
+			self.logic.stopProcess()
+			slicer.util.messageBox("Stopping process.")
+			
+			self.ui.stopButton.enabled = False
+			self.ui.startButton.enabled = True
 
-        with slicer.util.tryWithErrorDisplay("Segment post processing failed.", waitCursor = True):
-            self.logic.cleanSegmentation(self._parameterNode.outputSegment)
+			self._toggleSelectors(True)
+		
+	def onShowButton(self, toggled = True):
+		"""
+		Show 3D segmentation button click logic
+		
+		:param toggled: to toggle display on or off
+		"""
+		# print(toggled)
+		
+		segmentationNode = self.ui.segmentSelector.currentNode()
+		if not segmentationNode:
+			slicer.util.messageBox("No segment selected.")
+			return
+		
+		segmentationNode.CreateDefaultDisplayNodes()
+		displayNode = segmentationNode.GetDisplayNode()
+		
+		if not displayNode:
+			slicer.util.messageBox("Something went wrong when obtaining segmentation display nodes.")
+			return
+		
+		if toggled:
+			segmentationNode.CreateClosedSurfaceRepresentation()
+		displayNode.SetVisibility3D(toggled)
+	
+	def onDownloadButton(self):
+		"""
+		Run download logic when user clicks "Download Model" button
+		"""
+		
+		with slicer.util.tryWithErrorDisplay("Model download failed, try again later.", waitCursor = True):
+			progress_bar = slicer.util.createProgressDialog(
+				parent=slicer.util.mainWindow(),
+				windowTitle='Model Download', 
+				autoClose=True, 
+				minimum = 0, 
+			)
 
-    # Node callbacks
 
-    def onVolumeNodeChanged(self, node):
-        """
-        Callback method for changes in input volume node selection
-        
-        Sets the current volume in viewer to the new selection
-        
-        Do not rely on parameter node, this may be changed to connect to another selector 
-        """
-        
-        if node:
-            appLogic = slicer.app.applicationLogic()
-            selection = appLogic.GetSelectionNode()
-            
-            selection.SetReferenceActiveVolumeID(node.GetID())
-            appLogic.PropagateVolumeSelection()
+			# bring progress window to the foreground
+			progress_bar.setCancelButton(None) 
+			progress_bar.show()
+			progress_bar.raise_()
+			progress_bar.activateWindow()
 
-            volName = node.GetName() or "Volume"
-            self.ui.segmentSelector.baseName = f"{volName} Segmentation"
-        
-    def onSegmentNodeChanged(self, node):
-        """
-        Callback method for changes in selected segmentation node
-        
-        Sets new selected segmentation node to 2D viewer and segment table view
-        """
-        
-        if node:
-            self.ui.segmentsTableView.setSegmentationNode(node)
-            node.CreateDefaultDisplayNodes()
-            display = node.GetDisplayNode()
-            if display:
-                display.SetVisibility2D(True)
-                display.SetVisibility3D(self.ui.showButton.isChecked())
-    
-    # Inference callback
-    def onInferenceFinished(self):
-        """
-        Simple callback for inference finish to re-enable selectors
-        """
-        self.ui.postButton.enabled = True
-        self._toggleSelectors(True)
+			slicer.app.processEvents()
+
+			# run download process
+			self.logic.downloadWeights(downloadAgain = True, progressBar = progress_bar)
+		
+	def onLoadButton(self):
+		"""
+		Run weight loading logic when user clicks "Load Model" button
+		
+		Mainly for testing purposes
+		"""
+
+		with slicer.util.tryWithErrorDisplay("Model loading failed.", waitCursor = True):
+			self.logic.loadWeights(True) # force reload
+			self.ui.checkBox.setChecked(self.logic.hasValidParams)
+
+	def onPostButton(self):
+		"""
+		Used for post-processing segmentations, remove all islands except largest.
+		"""
+
+		with slicer.util.tryWithErrorDisplay("Segment post processing failed.", waitCursor = True):
+			self.logic.cleanSegmentation(self._parameterNode.outputSegment)
+
+	# Node callbacks
+
+	def onVolumeNodeChanged(self, node):
+		"""
+		Callback method for changes in input volume node selection
+		
+		Sets the current volume in viewer to the new selection
+		
+		Do not rely on parameter node, this may be changed to connect to another selector 
+		"""
+		
+		if node:
+			appLogic = slicer.app.applicationLogic()
+			selection = appLogic.GetSelectionNode()
+			
+			selection.SetReferenceActiveVolumeID(node.GetID())
+			appLogic.PropagateVolumeSelection()
+
+			volName = node.GetName() or "Volume"
+			self.ui.segmentSelector.baseName = f"{volName} Segmentation"
+		
+	def onSegmentNodeChanged(self, node):
+		"""
+		Callback method for changes in selected segmentation node
+		
+		Sets new selected segmentation node to 2D viewer and segment table view
+		"""
+		
+		if node:
+			self.ui.segmentsTableView.setSegmentationNode(node)
+			node.CreateDefaultDisplayNodes()
+			display = node.GetDisplayNode()
+			if display:
+				display.SetVisibility2D(True)
+				display.SetVisibility3D(self.ui.showButton.isChecked())
+	
+	# Inference callback
+	def onInferenceFinished(self):
+		"""
+		Simple callback for inference finish to re-enable selectors
+		"""
+		self.ui.postButton.enabled = True
+		self._toggleSelectors(True)
 
 #
 # handCBCTLogic moved to handCBCTLib.Logic
@@ -409,55 +409,65 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 #
 
 class handCBCTTest(ScriptedLoadableModuleTest):
-    """
-    This is the test case for your scripted module.
-    Uses ScriptedLoadableModuleTest base class, available at:
-    https://github.com/Slicer/Slicer/blob/master/Base/Python/slicer/ScriptedLoadableModule.py
-    """
+	"""
+	This is the test case for your scripted module.
+	Uses ScriptedLoadableModuleTest base class, available at:
+	https://github.com/Slicer/Slicer/blob/master/Base/Python/slicer/ScriptedLoadableModule.py
+	"""
 
-    def setUp(self):
-        """ Do whatever is needed to reset the state - typically a scene clear will be enough.
-        """
-        slicer.mrmlScene.Clear()
+	def setUp(self):
+		""" Do whatever is needed to reset the state - typically a scene clear will be enough.
+		"""
+		slicer.mrmlScene.Clear()
 
-    def runTest(self):
-        """Run as few or as many tests as needed here.
-        """
-        self.setUp()
-        self.test_handCBCT1()
+	def runTest(self):
+		"""Run as few or as many tests as needed here.
+		"""
+		self.setUp()
+        self.test_logic_helpers()
+        self.test_logic_state_flags()
+        self.test_cleanSegmentation_keeps_largest_island()
 
-    def test_handCBCT1(self):
-        """ Ideally you should have several levels of tests.  At the lowest level
-        tests should exercise the functionality of the logic with different inputs
-        (both valid and invalid).  At higher levels your tests should emulate the
-        way the user would interact with your code and confirm that it still works
-        the way you intended.
-        One of the most important features of the tests is that it should alert other
-        developers when their changes will have an impact on the behavior of your
-        module.  For example, if a developer removes a feature that you depend on,
-        your test should break so they know that the feature is needed.
-        """
+	
+	def test_handCBCT1(self):
+		""" Ideally you should have several levels of tests.  At the lowest level
+		tests should exercise the functionality of the logic with different inputs
+		(both valid and invalid).  At higher levels your tests should emulate the
+		way the user would interact with your code and confirm that it still works
+		the way you intended.
+		One of the most important features of the tests is that it should alert other
+		developers when their changes will have an impact on the behavior of your
+		module.  For example, if a developer removes a feature that you depend on,
+		your test should break so they know that the feature is needed.
+		"""
 
-        self.delayDisplay("Starting the test")
+		self.delayDisplay("Starting the test")
 
-        # Get/create input data
+		# Get/create input data
 
-        import SampleData
-        registerSampleData()
-        inputVolume = SampleData.downloadSample('handCBCT1')
-        self.delayDisplay('Loaded test data set')
+		import SampleData
+		registerSampleData()
+		inputVolume = SampleData.downloadSample('handCBCT Sample')
+		self.delayDisplay('Loaded test data set')
 
-        inputScalarRange = inputVolume.GetImageData().GetScalarRange()
-        self.assertEqual(inputScalarRange[0], 0)
-        self.assertEqual(inputScalarRange[1], 695)
+		message = "This test may take a long time (>10 minutes). Do you want to proceed with this action?"
+		title = "Action Confirmation"
 
-        outputVolume = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLScalarVolumeNode")
-        threshold = 100
+		# Display yes/no dialog
+		# slicer.util.confirmYesNoDisplay(message, windowTitle=title):
 
-        # Test the module logic
 
-        logic = handCBCTLogic()
+		inputScalarRange = inputVolume.GetImageData().GetScalarRange()
+		self.assertEqual(inputScalarRange[0], 0)
+		self.assertEqual(inputScalarRange[1], 695)
 
-        # tests here
+		outputVolume = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLScalarVolumeNode")
+		threshold = 100
 
-        self.delayDisplay('Test passed')
+		# Test the module logic
+
+		logic = handCBCTLogic()
+
+		# tests here
+
+		self.delayDisplay('Test passed')
