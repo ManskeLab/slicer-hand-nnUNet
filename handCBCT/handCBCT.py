@@ -353,8 +353,29 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 		Used for post-processing segmentations, remove all islands except largest.
 		"""
 
+<<<<<<< HEAD
 		with slicer.util.tryWithErrorDisplay("Segment post processing failed.", waitCursor = True):
 			self.logic.cleanSegmentation(self._parameterNode.outputSegment)
+=======
+        with slicer.util.tryWithErrorDisplay("Segment post processing failed.", waitCursor = True):
+            progress_bar = slicer.util.createProgressDialog(
+                parent=slicer.util.mainWindow(),
+                windowTitle='Segmentation Postprocessing', 
+                autoClose=True, 
+                minimum = 0, 
+            )
+
+
+            # bring progress window to the foreground
+            progress_bar.setCancelButton(None) 
+            progress_bar.show()
+            progress_bar.raise_()
+            progress_bar.activateWindow()
+
+            slicer.app.processEvents()
+
+            self.logic.cleanSegmentation(self._parameterNode.outputSegment, progressBar = progress_bar)
+>>>>>>> ed3920c (added: progress bar for segmentation clean up)
 
 	# Node callbacks
 
