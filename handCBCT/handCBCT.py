@@ -94,8 +94,6 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self._parameterNode = None
         self._parameterNodeGuiTag = False
 
-        
-
     def setup(self):
         """
         Called when the user opens the module the first time and the widget is initialized.
@@ -217,6 +215,8 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             # initial call
             self._checkCanShow()
             self._checkCanStart()
+
+    # internal methods
     
     def _checkCanShow(self, caller = None, event = None) -> None:
         """
@@ -258,6 +258,8 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         return
 
 
+    # Button callbacks
+
     def onStartButton(self):
         """
         Run processing when user clicks "Start" button.
@@ -273,8 +275,6 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             # Compute output
             self.logic.process(self._parameterNode.inputVolume, self._parameterNode.foldCount, self._parameterNode.deviceType, self._parameterNode.outputSegment)
 
-
-        
     def onStopButton(self):
         """
         Stop operation when user clicks "Stop" button
@@ -311,7 +311,6 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         if toggled:
             segmentationNode.CreateClosedSurfaceRepresentation()
         displayNode.SetVisibility3D(toggled)
-
     
     def onDownloadButton(self):
         """
@@ -357,6 +356,7 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         with slicer.util.tryWithErrorDisplay("Segment post processing failed.", waitCursor = True):
             self.logic.cleanSegmentation(self._parameterNode.outputSegment)
 
+    # Node callbacks
 
     def onVolumeNodeChanged(self, node):
         """
@@ -375,10 +375,8 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             appLogic.PropagateVolumeSelection()
 
             volName = node.GetName() or "Volume"
-            self.ui.segmentSelector.baseName = f"{volName}_segmentation"
+            self.ui.segmentSelector.baseName = f"{volName} Segmentation"
         
-        
-    
     def onSegmentNodeChanged(self, node):
         """
         Callback method for changes in selected segmentation node
@@ -394,6 +392,7 @@ class handCBCTWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
                 display.SetVisibility2D(True)
                 display.SetVisibility3D(self.ui.showButton.isChecked())
     
+    # Inference callback
     def onInferenceFinished(self):
         """
         Simple callback for inference finish to re-enable selectors
