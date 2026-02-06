@@ -10,6 +10,7 @@
 2. **Install:** Install the handCBCT module
 
 3. **Loading:** Load CBCT scan into Slicer
+- You may wish to crop the volume before segmentation using the 'Crop Volume' tool in Slicer
 
 4. **Module:** Open module in Modules -> Segmentations -> handCBCT
 
@@ -32,6 +33,10 @@ Intel MacOS Requirements:
 - numpy <2
 - torch <2.3 (with nnunetv2 2.5.2)
 - See: https://github.com/MIC-DKFZ/nnUNet/issues/2742
+
+
+## Helpful Resources
+https://www.youtube.com/watch?v=u93kI1MG6Ic&t
 
 
 ## Credit
