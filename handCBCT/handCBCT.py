@@ -1,7 +1,6 @@
 import os
 
 import vtk
-
 import slicer
 
 from slicer.i18n import translate
@@ -31,8 +30,10 @@ This is a scripted loadable module for wrist bone segmentation via nnUNet.
 """
 		# TODO: replace with organization, grant and thanks
 		self.parent.acknowledgementText = """
-This file was originally developed by Jean-Christophe Fillion-Robin, Kitware Inc., Andras Lasso, PerkLab,
-and Steve Pieper, Isomics, Inc. and was partially funded by NIH grant 3P41RR013218-12S1.
+	Updated on February 26, 2026.<br>
+    Manske Lab<br>
+    McCaig Institue for Bone and Joint Health<br>
+    University of Calgary
 """
 
 		# Additional initialization step after application startup is complete
